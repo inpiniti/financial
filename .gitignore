@@ -1,0 +1,16 @@
+# App dependencies
+app/node_modules/
+app/.env.local
+app/.env
+
+# App build output
+app/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
