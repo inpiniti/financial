@@ -30,6 +30,7 @@ curl -s -H "User-Agent: $UA" \
 - `annualTotalRevenue`, `annualGrossProfit`, `annualOperatingIncome`, `annualNetIncome`
 - `annualDilutedEPS`, `annualFreeCashFlow`, `annualOperatingCashFlow`
 - `annualTotalDebt`, `annualStockholdersEquity`, `annualCashAndCashEquivalents`
+- `annualCurrentAssets`, `annualCurrentLiabilities`, `annualInventory` — 유동비율·NCAV·재고 추이 계산용
 
 응답의 `reportedValue.raw`가 수치, `asOfDate`가 기준일. 마진·ROE·부채비율은 이 원자료로 직접 계산한다.
 
@@ -53,10 +54,13 @@ curl -s -b "$CJ" -H "User-Agent: $UA" \
 유용한 모듈:
 
 - `summaryDetail` — PER(trailing/forward), PBR 계산용, 배당수익률, 시가총액
-- `defaultKeyStatistics` — PEG, EV/EBITDA, 발행주식수, 베타
+- `defaultKeyStatistics` — PEG, EV/EBITDA, 발행주식수, 베타, `shortPercentOfFloat`(공매도 비율), `heldPercentInsiders`/`heldPercentInstitutions`(내부자·기관 지분율)
 - `financialData` — ROE, 마진, 목표주가(애널리스트), 추천 등급, 현금/부채
 - `earningsTrend` — EPS/매출 컨센서스 추정치 (FY1/FY2, 애널리스트 수 포함)
 - `earnings` — 최근 분기 실적과 어닝 서프라이즈
+- `majorHoldersBreakdown` — 내부자·기관 지분율 (defaultKeyStatistics와 교차 확인용)
+- `recommendationTrend` — 애널리스트 등급 분포 (strongBuy/buy/hold/sell/strongSell 인원, 월별)
+- `calendarEvents` — 차기 실적 발표일, 배당락일
 
 ## 4. 미국 상장사 공시 원자료 — SEC EDGAR (crumb 불필요, UA에 이메일 권장)
 
