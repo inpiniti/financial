@@ -8,6 +8,7 @@ import { RouteFallback } from './components/route-fallback.tsx'
 
 const ReportPage = lazy(() => import('./pages/ReportPage.tsx'))
 const BooksPage = lazy(() => import('./pages/BooksPage.tsx'))
+const ScreenerPage = lazy(() => import('./pages/ScreenerPage.tsx'))
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -28,6 +29,14 @@ createRoot(document.getElementById('root')!).render(
             element={
               <Suspense fallback={<RouteFallback />}>
                 <BooksPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="screener"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <ScreenerPage />
               </Suspense>
             }
           />

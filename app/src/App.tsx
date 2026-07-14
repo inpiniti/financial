@@ -1,7 +1,12 @@
 // 앱 레이아웃 — 상단 헤더(앱 타이틀 · 서재 링크 · 다크모드 토글) + <Outlet/>.
 // 라우트 정의는 main.tsx에 있다 (이 컴포넌트는 각 라우트가 공유하는 뼈대만 담당).
 
-import { Bookshelf01FreeIcons, Moon02FreeIcons, Sun03FreeIcons } from '@hugeicons/core-free-icons'
+import {
+  Bookshelf01FreeIcons,
+  FilterFreeIcons,
+  Moon02FreeIcons,
+  Sun03FreeIcons,
+} from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Link, Outlet } from 'react-router'
 import { Button } from '@/components/ui/button'
@@ -19,6 +24,12 @@ function App() {
             투자 보고서
           </Link>
           <nav className="flex items-center gap-1">
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/screener">
+                <HugeiconsIcon icon={FilterFreeIcons} data-icon="inline-start" />
+                종목 찾기
+              </Link>
+            </Button>
             <Button asChild variant="ghost" size="sm">
               <Link to="/books">
                 <HugeiconsIcon icon={Bookshelf01FreeIcons} data-icon="inline-start" />
