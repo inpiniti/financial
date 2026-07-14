@@ -17,3 +17,11 @@ LLY : 일라이 릴리 앤드 컴퍼니
 MU : 마이크론 테크놀로지
 SPCX : 스페이스X
 SPLG : S&P 500 ETF
+ARM : ARM 홀딩스(ADR)
+NFLX : 넷플릭스
+LRCX : 램 리서치
+AMAT : 어플라이드 머티리얼즈
+AMD : AMD
+PLTR : 팔란티어
+PDD : 핀둬둬(ADR)
+CMCSA : 컴캐스트
