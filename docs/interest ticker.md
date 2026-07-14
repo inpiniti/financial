@@ -11,3 +11,9 @@ AAPL : 애플
 TSM : TSMC
 005930 : 삼성전자
 000660 : 하이닉스
+CRMD : 코메딕스
+AVGO : 브로드컴
+LLY : 일라이 릴리 앤드 컴퍼니
+MU : 마이크론 테크놀로지
+SPCX : 스페이스X
+SPLG : S&P 500 ETF
