@@ -25,6 +25,12 @@ function App() {
           </Link>
           <nav className="flex items-center gap-1">
             <Button asChild variant="ghost" size="sm">
+              <Link to="/">
+                <HugeiconsIcon icon={Bookshelf01FreeIcons} data-icon="inline-start" />
+                대시보드
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
               <Link to="/screener">
                 <HugeiconsIcon icon={FilterFreeIcons} data-icon="inline-start" />
                 종목 찾기
