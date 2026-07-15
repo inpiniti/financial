@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 export interface VerdictBadgeProps {
-  verdict: Verdict | null
+  verdict: Verdict | null | undefined
   /** 확신도(1~10). 있으면 "관망 8"처럼 의견 뒤에 병기한다. */
   confidence?: number | null
   className?: string
