@@ -234,7 +234,7 @@ function MainView({
       </header>
 
       <Tabs value={activeTab} onValueChange={onChangeTab} className="w-full">
-        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+        <TabsList className="grid w-full max-w-[560px] grid-cols-3">
           <TabsTrigger value="gurus" className="gap-1.5 py-1">
             <HugeiconsIcon icon={UserFreeIcons} className="size-3.5" />
             거장 리스트
@@ -242,6 +242,10 @@ function MainView({
           <TabsTrigger value="tickers" className="gap-1.5 py-1">
             <HugeiconsIcon icon={LayersFreeIcons} className="size-3.5" />
             종목 리스트
+          </TabsTrigger>
+          <TabsTrigger value="screener" className="gap-1.5 py-1">
+            <HugeiconsIcon icon={Search01FreeIcons} className="size-3.5" />
+            종합 스크리너
           </TabsTrigger>
         </TabsList>
 
@@ -345,6 +349,22 @@ function MainView({
               </div>
             </div>
           )}
+        </TabsContent>
+
+        {/* 종합 스크리너 탭 — 13인 공통분모(공통 프리셋) */}
+        <TabsContent value="screener" className="mt-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                <HugeiconsIcon icon={Search01FreeIcons} className="size-4 text-muted-foreground" />
+                13인 공통분모 스크리너
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                거장 13인의 필터에서 공통으로 겹치는 조건만 모아, 누구 기준으로 봐도 무난한 종목을 걸러냅니다.
+              </p>
+            </div>
+            <ScreenerDataTable screenerKey="공통" />
+          </div>
         </TabsContent>
       </Tabs>
     </div>
