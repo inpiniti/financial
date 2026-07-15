@@ -42,7 +42,7 @@ function ScreenerPage() {
   useEffect(() => {
     const controller = new AbortController()
     setPicksState('loading')
-    fetchGuruPicks(selected, nation, 50, controller.signal)
+    fetchGuruPicks(selected, nation, 200, controller.signal)
       .then((data) => {
         setPicks(data)
         setPicksState('ready')
@@ -239,7 +239,14 @@ function StockRow({ stock, columns }: { stock: Stock; columns: string[] }) {
               className="size-5 shrink-0 rounded-full"
             />
           )}
-          <span className="font-medium whitespace-nowrap">{stock.name}</span>
+          <div className="flex flex-col leading-tight">
+            <span className="font-medium whitespace-nowrap">{stock.name}</span>
+            {stock.ticker && (
+              <span className="font-mono text-[0.6875rem] text-muted-foreground">
+                {stock.ticker}
+              </span>
+            )}
+          </div>
         </div>
       </td>
       <td className="px-3 py-2 text-right whitespace-nowrap">

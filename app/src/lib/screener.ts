@@ -84,7 +84,7 @@ export async function fetchGurus(signal?: AbortSignal): Promise<Guru[]> {
 export async function fetchGuruPicks(
   guruKey: string,
   nation: Nation,
-  size = 50,
+  size = 200,
   signal?: AbortSignal,
 ): Promise<GuruPicks> {
   return getJson<GuruPicks>(

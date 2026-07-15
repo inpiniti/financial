@@ -11,6 +11,17 @@ import { parseFinalMeta, parseGuruMeta, parseTickerMap, type Tally, type Verdict
 
 export type { Verdict, Tally } from './meta'
 
+/** 경로 → 헤더 메타(빌드 타임 매니페스트). 있으면 본문을 읽지 않고 메타를 채운다. */
+export type ReportMetaMap = Record<
+  string,
+  {
+    verdict?: Verdict | null
+    confidence?: number | null
+    finalVerdict?: string | null
+    tally?: Tally | null
+  }
+>
+
 /** 열람 시점에 본문(raw markdown)을 로딩하는 lazy 로더. */
 export type RawLoader = () => Promise<string>
 
@@ -99,15 +110,18 @@ interface TickerAccumulator {
  * @param paths     보고서 md 경로 목록
  * @param loadRaw   경로 → 본문 raw markdown 로더 (헤더 메타 추출 및 lazy 본문 로딩에 사용)
  * @param names     ticker → 한글명 매핑 (interest ticker.md, 없으면 ticker 그대로)
+ * @param metaByPath 경로 → 헤더 메타 매니페스트. 주면 본문을 읽지 않고 이 값으로 메타를 채운다
+ *                   (첫 화면에서 수백 개 본문 fetch를 없애는 핵심). 없으면 loadRaw로 본문을 읽어 파싱.
  *
- * 대시보드가 표결·의견 배지를 보여줘야 하므로, 빌드 시 거장/최종 보고서 본문을
- * 로딩해 헤더 메타(verdict·confidence·tally·finalVerdict)를 추출한다. 그래서 async.
+ * 대시보드가 표결·의견 배지를 보여줘야 하므로 헤더 메타(verdict·confidence·tally·finalVerdict)가
+ * 필요하다. 빌드 타임 매니페스트가 있으면 그걸 쓰고, 없을 때만(예: 테스트) 본문을 읽는다.
  * 데이터팩·토론은 메타가 없으므로 로딩하지 않고 lazy 로더만 노출한다.
  */
 export async function buildCatalog(
   paths: string[],
   loadRaw: (path: string) => Promise<string>,
   names: Map<string, string> = new Map(),
+  metaByPath?: ReportMetaMap,
 ): Promise<ReportCatalog> {
   // 1) date → ticker → accumulator 로 그룹화
   const byDate = new Map<string, Map<string, TickerAccumulator>>()
@@ -159,10 +173,15 @@ export async function buildCatalog(
     for (const tk of tickerKeys) {
       const acc = tickers.get(tk)!
 
-      // 거장 보고서: 본문 로딩 → 메타 추출, 표시명 정렬
+      // 거장 보고서: 매니페스트가 있으면 그걸로, 없으면 본문 로딩 → 메타 추출. 표시명 정렬.
       const gurus: GuruReport[] = await Promise.all(
         acc.gurus.map(async (g) => {
-          const meta = parseGuruMeta(await loadRaw(g.path))
+          const meta = metaByPath
+            ? {
+                verdict: metaByPath[g.path]?.verdict ?? null,
+                confidence: metaByPath[g.path]?.confidence ?? null,
+              }
+            : parseGuruMeta(await loadRaw(g.path))
           return {
             guru: g.folder.replace(/-/g, ' '),
             folder: g.folder,
@@ -188,7 +207,12 @@ export async function buildCatalog(
       if (acc.finalPath) {
         const finalPath = acc.finalPath
         report.final = () => loadRaw(finalPath)
-        const fmeta = parseFinalMeta(await loadRaw(finalPath))
+        const fmeta = metaByPath
+          ? {
+              finalVerdict: metaByPath[finalPath]?.finalVerdict ?? null,
+              tally: metaByPath[finalPath]?.tally ?? null,
+            }
+          : parseFinalMeta(await loadRaw(finalPath))
         if (fmeta.finalVerdict) report.finalVerdict = fmeta.finalVerdict
         if (fmeta.tally) report.tally = fmeta.tally
       }
@@ -207,6 +231,10 @@ export async function buildCatalog(
 /**
  * 실제 `docs/` 를 glob으로 스캔해 카탈로그를 만든다.
  * glob 결과는 테스트 환경에 없으므로 로직은 buildCatalog에 두고 여기서는 연결만 한다.
+ *
+ * 성능: 헤더 메타는 빌드/개발 타임에 미리 뽑은 `virtual:report-meta` 매니페스트로 채운다.
+ * 덕분에 첫 화면에서 보고서 본문(수백 개 md 청크)을 하나도 fetch 하지 않는다.
+ * glob 로더는 lazy — 열람 시에만 해당 청크를 받는다.
  */
 export async function loadCatalog(): Promise<ReportCatalog> {
   const reportGlob = import.meta.glob('../../../docs/report/**/*.md', {
@@ -219,9 +247,10 @@ export async function loadCatalog(): Promise<ReportCatalog> {
     import: 'default',
   }) as Record<string, () => Promise<string>>
 
+  const { reportMeta } = await import('virtual:report-meta')
   const names = await loadTickerNames(tickerGlob)
   const paths = Object.keys(reportGlob)
-  return buildCatalog(paths, (p) => reportGlob[p](), names)
+  return buildCatalog(paths, (p) => reportGlob[p](), names, reportMeta)
 }
 
 async function loadTickerNames(
