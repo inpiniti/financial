@@ -34,7 +34,7 @@ interface DocEntry {
   label: string
   disabled: boolean
   icon: any
-  verdict?: Verdict | null
+  verdict?: Verdict | null | undefined
   confidence?: number | null
 }
 
@@ -483,7 +483,7 @@ function TickerDetailView({
   // 해당 ticker를 갖고 있는 날짜별 보고서 수집
   const reportsForTicker = useMemo(() => {
     const list: TickerReport[] = []
-    for (const [dateKey, reports] of catalog.entries()) {
+    for (const reports of catalog.values()) {
       const match = reports.find((r) => r.ticker === ticker)
       if (match) {
         list.push(match)
