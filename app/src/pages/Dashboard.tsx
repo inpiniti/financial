@@ -90,6 +90,29 @@ export default function Dashboard() {
     }
   }, [])
 
+  // 로고 매핑 (국내/해외 종목별)
+  const logoMap = useMemo(() => {
+    const map = new Map<string, string>()
+    // 국내: 005930(Samsung) → samsung, 000660(SK Telecom) → sk-telecom, 등
+    const krLogos: Record<string, string> = {
+      '005930': 'samsung', '000660': 'sk-telecom', '402340': 'sk-square',
+      '009150': 'samsung', '005380': 'hyundai', '373220': 'lg-energy-solution',
+      '207940': 'samsung', '105560': 'kb-financial', '032830': 'samsung',
+      '028260': 'samsung', '000270': 'kia', '012330': 'hyundai-mobis',
+      '066970': 'lg-display', '051910': 'lg-chem', '034730': 'sk-netsgo',
+      '003490': 'hyundai-engineering', '015760': 'lg-electronics', '011170': 'lg-display',
+    }
+    // 해외: NVDA(Nvidia) → nvidia, AAPL(Apple) → apple, 등
+    const usLogos: Record<string, string> = {
+      'NVDA': 'nvidia', 'AAPL': 'apple', 'GOOG': 'alphabet', 'MSFT': 'microsoft',
+      'AMZN': 'amazon', 'AVGO': 'broadcom', 'SPCX': 'spacex', 'META': 'meta-platforms',
+      'TSLA': 'tesla', 'LLY': 'eli-lilly',
+    }
+    Object.entries(krLogos).forEach(([ticker, logoid]) => map.set(ticker, logoid))
+    Object.entries(usLogos).forEach(([ticker, logoid]) => map.set(ticker, logoid))
+    return map
+  }, [])
+
   // 1. 공통 종목 리스트 생성 (보고서로 저장되어 있는 고유 종목 리스트)
   //    각 종목에 최신 '완료(final)' 보고서 기준의 종합의견·투표통계를 함께 계산한다.
   const uniqueTickers = useMemo<TickerRow[]>(() => {
@@ -105,9 +128,11 @@ export default function Dashboard() {
       for (const r of reports) {
         let agg = tickerMap.get(r.ticker)
         if (!agg) {
+          const logoid = logoMap.get(r.ticker)
           agg = {
             ticker: r.ticker,
             name: r.name,
+            logoImageUrl: logoid ? `https://s3-symbol-logo.tradingview.com/${logoid}.svg` : null,
             reportCount: 0,
             lastDate: date,
             latestFinalDate: null,
@@ -132,7 +157,7 @@ export default function Dashboard() {
     }
 
     return Array.from(tickerMap.values()).sort((a, b) => b.lastDate.localeCompare(a.lastDate))
-  }, [loadState])
+  }, [loadState, logoMap])
 
   // 스택 이동 함수
   const pushView = (params: Record<string, string>) => {
@@ -201,6 +226,7 @@ export default function Dashboard() {
 interface TickerRow {
   ticker: string
   name: string
+  logoImageUrl: string | null
   reportCount: number
   lastDate: string
   latestVerdict: Verdict | null
@@ -317,7 +343,19 @@ function MainView({
                         onClick={() => onSelectTicker(t.ticker)}
                         className="hover:bg-muted/40 cursor-pointer transition-colors"
                       >
-                        <td className="px-4 py-3 font-mono font-medium text-muted-foreground">{t.ticker}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            {t.logoImageUrl && (
+                              <img
+                                src={t.logoImageUrl}
+                                alt=""
+                                loading="lazy"
+                                className="size-5 shrink-0 rounded-full"
+                              />
+                            )}
+                            <span className="font-mono font-medium text-muted-foreground">{t.ticker}</span>
+                          </div>
+                        </td>
                         <td className="px-4 py-3 font-medium text-foreground">{t.name}</td>
                         <td className="px-4 py-3">
                           {t.latestVerdict ? (
