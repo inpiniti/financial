@@ -30,6 +30,13 @@ import { Separator } from '@/components/ui/separator'
 import { MarkdownView } from '@/components/markdown-view'
 import { ScreenerDataTable } from '@/components/screener-data-table'
 import { useSetTitle } from '@/components/title-context'
+import krLogoData from '../../../docs/kr_logo.json'
+import usLogoData from '../../../docs/us_logo.json'
+
+interface LogoItem {
+  ticker?: string
+  logoid?: string
+}
 
 // 스택의 각 문서 엔트리 타입 정의
 interface DocEntry {
@@ -93,23 +100,12 @@ export default function Dashboard() {
   // 로고 매핑 (국내/해외 종목별)
   const logoMap = useMemo(() => {
     const map = new Map<string, string>()
-    // 국내: 005930(Samsung) → samsung, 000660(SK Telecom) → sk-telecom, 등
-    const krLogos: Record<string, string> = {
-      '005930': 'samsung', '000660': 'sk-telecom', '402340': 'sk-square',
-      '009150': 'samsung', '005380': 'hyundai', '373220': 'lg-energy-solution',
-      '207940': 'samsung', '105560': 'kb-financial', '032830': 'samsung',
-      '028260': 'samsung', '000270': 'kia', '012330': 'hyundai-mobis',
-      '066970': 'lg-display', '051910': 'lg-chem', '034730': 'sk-netsgo',
-      '003490': 'hyundai-engineering', '015760': 'lg-electronics', '011170': 'lg-display',
-    }
-    // 해외: NVDA(Nvidia) → nvidia, AAPL(Apple) → apple, 등
-    const usLogos: Record<string, string> = {
-      'NVDA': 'nvidia', 'AAPL': 'apple', 'GOOG': 'alphabet', 'MSFT': 'microsoft',
-      'AMZN': 'amazon', 'AVGO': 'broadcom', 'SPCX': 'spacex', 'META': 'meta-platforms',
-      'TSLA': 'tesla', 'LLY': 'eli-lilly',
-    }
-    Object.entries(krLogos).forEach(([ticker, logoid]) => map.set(ticker, logoid))
-    Object.entries(usLogos).forEach(([ticker, logoid]) => map.set(ticker, logoid))
+
+    ;[...(krLogoData as LogoItem[]), ...(usLogoData as LogoItem[])].forEach((item) => {
+      if (!item.ticker || !item.logoid) return
+      map.set(item.ticker, item.logoid)
+    })
+
     return map
   }, [])
 
