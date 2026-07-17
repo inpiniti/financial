@@ -314,8 +314,25 @@ function MainView({
                       className="hover:bg-muted/40 cursor-pointer transition-colors"
                     >
                       <td className="px-4 py-3 font-medium text-foreground flex items-center gap-2">
-                        <div className="flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                          <HugeiconsIcon icon={UserFreeIcons} className="size-3.5" />
+                        <div className="size-7 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                          {guru.avatar ? (
+                            <img
+                              src={guru.avatar}
+                              alt={guru.name}
+                              className="size-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="size-full items-center justify-center bg-muted text-muted-foreground"
+                            style={{ display: guru.avatar ? 'none' : 'flex' }}
+                          >
+                            <HugeiconsIcon icon={UserFreeIcons} className="size-3.5" />
+                          </div>
                         </div>
                         <span>{guru.name}</span>
                       </td>
@@ -498,8 +515,25 @@ function GuruDetailView({
         <Card className="md:col-span-2">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <HugeiconsIcon icon={UserFreeIcons} className="size-5" />
+              <div className="size-10 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center shrink-0">
+                {guruInfo.avatar ? (
+                  <img
+                    src={guruInfo.avatar}
+                    alt={guruInfo.name}
+                    className="size-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="size-full items-center justify-center bg-primary text-primary-foreground"
+                  style={{ display: guruInfo.avatar ? 'none' : 'flex' }}
+                >
+                  <HugeiconsIcon icon={UserFreeIcons} className="size-5" />
+                </div>
               </div>
               <div>
                 <CardTitle className="text-lg font-bold text-foreground">{guruInfo.name}</CardTitle>
