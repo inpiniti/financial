@@ -29,6 +29,13 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { MarkdownView } from '@/components/markdown-view'
 import { ScreenerDataTable } from '@/components/screener-data-table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useSetTitle } from '@/components/title-context'
 import krLogoData from '../../../docs/kr_logo.json'
 import usLogoData from '../../../docs/us_logo.json'
@@ -243,6 +250,21 @@ function MainView({
   onSelectTicker: (ticker: string) => void
 }) {
   useSetTitle('투자 보고서')
+  const [selectedScreener, setSelectedScreener] = useState<string>('공통')
+
+  const currentScreener = useMemo(() => {
+    if (selectedScreener === '공통') {
+      return {
+        title: '13인 공통분모 스크리너',
+        description: '거장 13인의 필터에서 공통으로 겹치는 조건만 모아, 누구 기준으로 봐도 무난한 종목을 걸러냅니다.',
+      }
+    }
+    const guru = GURUS_INFO.find((g) => g.screenerKey === selectedScreener)
+    return {
+      title: `${guru?.name || '거장'}의 스크리너`,
+      description: `${guru?.name || '거장'}의 투자 기준(${guru?.style || ''})을 바탕으로 필터링한 종목입니다.`,
+    }
+  }, [selectedScreener])
 
   return (
     <div className="flex flex-col gap-6">
@@ -385,19 +407,37 @@ function MainView({
           )}
         </TabsContent>
 
-        {/* 종합 스크리너 탭 — 13인 공통분모(공통 프리셋) */}
+        {/* 종합 스크리너 탭 — 13인 공통분모(공통 프리셋) 또는 선택된 거장 */}
         <TabsContent value="screener" className="mt-4">
           <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                <HugeiconsIcon icon={Search01FreeIcons} className="size-4 text-muted-foreground" />
-                13인 공통분모 스크리너
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                거장 13인의 필터에서 공통으로 겹치는 조건만 모아, 누구 기준으로 봐도 무난한 종목을 걸러냅니다.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                  <HugeiconsIcon icon={Search01FreeIcons} className="size-4 text-muted-foreground" />
+                  {currentScreener.title}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {currentScreener.description}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-muted-foreground font-medium">대상 필터 선택:</span>
+                <Select value={selectedScreener} onValueChange={setSelectedScreener}>
+                  <SelectTrigger className="h-7 w-[180px] text-xs">
+                    <SelectValue placeholder="필터 선택" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="공통">종합 (13인 공통분모)</SelectItem>
+                    {GURUS_INFO.map((guru) => (
+                      <SelectItem key={guru.key} value={guru.screenerKey}>
+                        {guru.name} ({guru.style.split(' / ')[0]})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <ScreenerDataTable screenerKey="공통" />
+            <ScreenerDataTable screenerKey={selectedScreener} />
           </div>
         </TabsContent>
       </Tabs>

@@ -37,9 +37,533 @@ import {
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { Slider } from '@/components/ui/slider'
 
 /** 표 한 행 — 고정 필드 + 동적 지표 값을 한 곳에 모은다(정렬용 raw 값 포함). */
 type Row = Stock & { changePercent: number | null }
+
+interface FilterRule {
+  metric: string
+  op: 'min' | 'max' | 'range'
+  value: number | [number, number]
+}
+
+const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
+  '공통': {
+    0: [],
+    1: [
+      { metric: '영업이익률', op: 'min', value: 0.11 },
+      { metric: 'ROE', op: 'min', value: 0.11 }
+    ],
+    2: [
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: 'ROE', op: 'min', value: 0.12 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 }
+    ],
+    3: [
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: 'ROE', op: 'min', value: 0.13 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
+    ],
+    4: [
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: 'ROE', op: 'min', value: 0.14 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    5: [
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: 'ROE', op: 'min', value: 0.15 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
+    ]
+  },
+  '그레이엄': {
+    0: [],
+    1: [
+      { metric: 'PER', op: 'range', value: [0, 14] },
+      { metric: 'PBR', op: 'range', value: [0, 1.4] }
+    ],
+    2: [
+      { metric: 'PER', op: 'range', value: [0, 13] },
+      { metric: 'PBR', op: 'range', value: [0, 1.3] },
+      { metric: '유동비율', op: 'min', value: 2.1 }
+    ],
+    3: [
+      { metric: 'PER', op: 'range', value: [0, 12] },
+      { metric: 'PBR', op: 'range', value: [0, 1.2] },
+      { metric: '유동비율', op: 'min', value: 2.2 },
+      { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
+    ],
+    4: [
+      { metric: 'PER', op: 'range', value: [0, 11] },
+      { metric: 'PBR', op: 'range', value: [0, 1.1] },
+      { metric: '유동비율', op: 'min', value: 2.3 },
+      { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    5: [
+      { metric: 'PER', op: 'range', value: [0, 10] },
+      { metric: 'PBR', op: 'range', value: [0, 1.0] },
+      { metric: '유동비율', op: 'min', value: 2.5 },
+      { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
+    ]
+  },
+  '클라먼': {
+    0: [],
+    1: [
+      { metric: 'PBR', op: 'range', value: [0, 0.9] },
+      { metric: 'PER', op: 'range', value: [0, 9] },
+      { metric: '영업이익률', op: 'min', value: 0.11 }
+    ],
+    2: [
+      { metric: 'PBR', op: 'range', value: [0, 0.8] },
+      { metric: 'PER', op: 'range', value: [0, 8] },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '이자보상배율', op: 'min', value: 6.0 }
+    ],
+    3: [
+      { metric: 'PBR', op: 'range', value: [0, 0.7] },
+      { metric: 'PER', op: 'range', value: [0, 7] },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '이자보상배율', op: 'min', value: 7.0 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    4: [
+      { metric: 'PBR', op: 'range', value: [0, 0.6] },
+      { metric: 'PER', op: 'range', value: [0, 6] },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '이자보상배율', op: 'min', value: 8.0 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
+    ],
+    5: [
+      { metric: 'PBR', op: 'range', value: [0, 0.5] },
+      { metric: 'PER', op: 'range', value: [0, 5] },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '이자보상배율', op: 'min', value: 10.0 },
+      { metric: '부채비율', op: 'max', value: 0.7 }
+    ]
+  },
+  '파브라이': {
+    0: [],
+    1: [
+      { metric: 'PER', op: 'range', value: [0, 9] },
+      { metric: 'PBR', op: 'range', value: [0, 0.9] },
+      { metric: 'ROE', op: 'min', value: 0.06 }
+    ],
+    2: [
+      { metric: 'PER', op: 'range', value: [0, 8] },
+      { metric: 'PBR', op: 'range', value: [0, 0.8] },
+      { metric: 'ROE', op: 'min', value: 0.07 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 }
+    ],
+    3: [
+      { metric: 'PER', op: 'range', value: [0, 7] },
+      { metric: 'PBR', op: 'range', value: [0, 0.7] },
+      { metric: 'ROE', op: 'min', value: 0.08 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '시가총액', op: 'min', value: 1500 * 100_000_000 }
+    ],
+    4: [
+      { metric: 'PER', op: 'range', value: [0, 6] },
+      { metric: 'PBR', op: 'range', value: [0, 0.6] },
+      { metric: 'ROE', op: 'min', value: 0.09 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '시가총액', op: 'min', value: 2000 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    5: [
+      { metric: 'PER', op: 'range', value: [0, 5] },
+      { metric: 'PBR', op: 'range', value: [0, 0.5] },
+      { metric: 'ROE', op: 'min', value: 0.10 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '시가총액', op: 'min', value: 2500 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
+    ]
+  },
+  '그린블라트': {
+    0: [],
+    1: [
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 9] },
+      { metric: 'ROA', op: 'min', value: 0.11 },
+      { metric: '영업이익률', op: 'min', value: 0.11 }
+    ],
+    2: [
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 8] },
+      { metric: 'ROA', op: 'min', value: 0.12 },
+      { metric: '영업이익률', op: 'min', value: 0.12 }
+    ],
+    3: [
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 7] },
+      { metric: 'ROA', op: 'min', value: 0.13 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
+    ],
+    4: [
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 6] },
+      { metric: 'ROA', op: 'min', value: 0.14 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 }
+    ],
+    5: [
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 5] },
+      { metric: 'ROA', op: 'min', value: 0.15 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 }
+    ]
+  },
+  '코스톨라니': {
+    0: [],
+    1: [
+      { metric: 'PER', op: 'range', value: [0, 14] },
+      { metric: 'ROE', op: 'min', value: 0.11 },
+      { metric: '이자보상배율', op: 'min', value: 6.0 }
+    ],
+    2: [
+      { metric: 'PER', op: 'range', value: [0, 13] },
+      { metric: 'ROE', op: 'min', value: 0.12 },
+      { metric: '이자보상배율', op: 'min', value: 7.0 }
+    ],
+    3: [
+      { metric: 'PER', op: 'range', value: [0, 12] },
+      { metric: 'ROE', op: 'min', value: 0.13 },
+      { metric: '이자보상배율', op: 'min', value: 8.0 },
+      { metric: '부채비율', op: 'max', value: 0.9 },
+      { metric: '시가총액', op: 'min', value: 12000 * 100_000_000 }
+    ],
+    4: [
+      { metric: 'PER', op: 'range', value: [0, 11] },
+      { metric: 'ROE', op: 'min', value: 0.14 },
+      { metric: '이자보상배율', op: 'min', value: 9.0 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
+      { metric: '시가총액', op: 'min', value: 15000 * 100_000_000 }
+    ],
+    5: [
+      { metric: 'PER', op: 'range', value: [0, 10] },
+      { metric: 'ROE', op: 'min', value: 0.15 },
+      { metric: '이자보상배율', op: 'min', value: 10.0 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
+      { metric: '시가총액', op: 'min', value: 20000 * 100_000_000 }
+    ]
+  },
+  '슈웨거': {
+    0: [],
+    1: [
+      { metric: '거래대금', op: 'min', value: 120 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.22 }
+    ],
+    2: [
+      { metric: '거래대금', op: 'min', value: 150 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.25 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    3: [
+      { metric: '거래대금', op: 'min', value: 180 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.28 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
+    ],
+    4: [
+      { metric: '거래대금', op: 'min', value: 200 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.30 },
+      { metric: '부채비율', op: 'max', value: 0.7 }
+    ],
+    5: [
+      { metric: '거래대금', op: 'min', value: 250 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.35 },
+      { metric: '부채비율', op: 'max', value: 0.6 }
+    ]
+  },
+  '버핏': {
+    0: [],
+    1: [
+      { metric: '매출총이익률', op: 'min', value: 0.42 },
+      { metric: 'ROE', op: 'min', value: 0.16 },
+      { metric: '순이익률', op: 'min', value: 0.16 }
+    ],
+    2: [
+      { metric: '매출총이익률', op: 'min', value: 0.45 },
+      { metric: 'ROE', op: 'min', value: 0.17 },
+      { metric: '순이익률', op: 'min', value: 0.17 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    3: [
+      { metric: '매출총이익률', op: 'min', value: 0.48 },
+      { metric: 'ROE', op: 'min', value: 0.18 },
+      { metric: '순이익률', op: 'min', value: 0.18 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
+      { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
+    ],
+    4: [
+      { metric: '매출총이익률', op: 'min', value: 0.50 },
+      { metric: 'ROE', op: 'min', value: 0.20 },
+      { metric: '순이익률', op: 'min', value: 0.20 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
+      { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 }
+    ],
+    5: [
+      { metric: '매출총이익률', op: 'min', value: 0.55 },
+      { metric: 'ROE', op: 'min', value: 0.22 },
+      { metric: '순이익률', op: 'min', value: 0.22 },
+      { metric: '부채비율', op: 'max', value: 0.6 },
+      { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 }
+    ]
+  },
+  '피셔': {
+    0: [],
+    1: [
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.22 },
+      { metric: '영업이익률', op: 'min', value: 0.11 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.11 },
+      { metric: '부채비율', op: 'max', value: 1.8 }
+    ],
+    2: [
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.25 },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.12 },
+      { metric: '부채비율', op: 'max', value: 1.6 }
+    ],
+    3: [
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.28 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.13 },
+      { metric: '부채비율', op: 'max', value: 1.4 }
+    ],
+    4: [
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.30 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.14 },
+      { metric: '부채비율', op: 'max', value: 1.2 }
+    ],
+    5: [
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.35 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.15 },
+      { metric: '부채비율', op: 'max', value: 1.0 }
+    ]
+  },
+  '뉴욕주민': {
+    0: [],
+    1: [
+      { metric: 'PER', op: 'range', value: [0, 18] },
+      { metric: '영업이익률', op: 'min', value: 0.11 },
+      { metric: 'ROE', op: 'min', value: 0.11 }
+    ],
+    2: [
+      { metric: 'PER', op: 'range', value: [0, 16] },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: 'ROE', op: 'min', value: 0.12 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 }
+    ],
+    3: [
+      { metric: 'PER', op: 'range', value: [0, 15] },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: 'ROE', op: 'min', value: 0.13 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    4: [
+      { metric: 'PER', op: 'range', value: [0, 14] },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: 'ROE', op: 'min', value: 0.14 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
+    ],
+    5: [
+      { metric: 'PER', op: 'range', value: [0, 12] },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: 'ROE', op: 'min', value: 0.15 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
+      { metric: '부채비율', op: 'max', value: 0.7 }
+    ]
+  },
+  '린치': {
+    0: [],
+    1: [
+      { metric: 'PER', op: 'range', value: [0, 18] },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.22 },
+      { metric: '영업이익률', op: 'min', value: 0.11 }
+    ],
+    2: [
+      { metric: 'PER', op: 'range', value: [0, 16] },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.25 },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    3: [
+      { metric: 'PER', op: 'range', value: [0, 15] },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.28 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
+      { metric: '시가총액', op: 'min', value: 1500 * 100_000_000 }
+    ],
+    4: [
+      { metric: 'PER', op: 'range', value: [0, 14] },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.30 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
+      { metric: '시가총액', op: 'min', value: 2000 * 100_000_000 },
+      { metric: '거래대금', op: 'min', value: 8 * 100_000_000 }
+    ],
+    5: [
+      { metric: 'PER', op: 'range', value: [0, 12] },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.35 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '부채비율', op: 'max', value: 0.6 },
+      { metric: '시가총액', op: 'min', value: 2500 * 100_000_000 },
+      { metric: '거래대금', op: 'min', value: 10 * 100_000_000 }
+    ]
+  },
+  '다모다란': {
+    0: [],
+    1: [
+      { metric: 'PER', op: 'range', value: [0, 14] },
+      { metric: 'PBR', op: 'range', value: [0, 1.4] },
+      { metric: 'ROE', op: 'min', value: 0.11 },
+      { metric: '영업이익률', op: 'min', value: 0.11 }
+    ],
+    2: [
+      { metric: 'PER', op: 'range', value: [0, 13] },
+      { metric: 'PBR', op: 'range', value: [0, 1.3] },
+      { metric: 'ROE', op: 'min', value: 0.12 },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 1.8 }
+    ],
+    3: [
+      { metric: 'PER', op: 'range', value: [0, 12] },
+      { metric: 'PBR', op: 'range', value: [0, 1.2] },
+      { metric: 'ROE', op: 'min', value: 0.13 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 1.6 },
+      { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.11 }
+    ],
+    4: [
+      { metric: 'PER', op: 'range', value: [0, 11] },
+      { metric: 'PBR', op: 'range', value: [0, 1.1] },
+      { metric: 'ROE', op: 'min', value: 0.14 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 1.4 },
+      { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.12 }
+    ],
+    5: [
+      { metric: 'PER', op: 'range', value: [0, 10] },
+      { metric: 'PBR', op: 'range', value: [0, 1.0] },
+      { metric: 'ROE', op: 'min', value: 0.15 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 1.0 },
+      { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.15 }
+    ]
+  },
+  '템플턴': {
+    0: [],
+    1: [
+      { metric: 'PER', op: 'range', value: [0, 18] },
+      { metric: '이자보상배율', op: 'min', value: 3.5 }
+    ],
+    2: [
+      { metric: 'PER', op: 'range', value: [0, 16] },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
+    ],
+    3: [
+      { metric: 'PER', op: 'range', value: [0, 15] },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
+      { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
+    ],
+    4: [
+      { metric: 'PER', op: 'range', value: [0, 14] },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
+      { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 }
+    ],
+    5: [
+      { metric: 'PER', op: 'range', value: [0, 12] },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 0.6 },
+      { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 }
+    ]
+  },
+  '버리': {
+    0: [],
+    1: [
+      { metric: 'PBR', op: 'range', value: [0, 0.9] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 9] },
+      { metric: '부채비율', op: 'max', value: 1.8 }
+    ],
+    2: [
+      { metric: 'PBR', op: 'range', value: [0, 0.8] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 8] },
+      { metric: '부채비율', op: 'max', value: 1.6 }
+    ],
+    3: [
+      { metric: 'PBR', op: 'range', value: [0, 0.7] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 7] },
+      { metric: '부채비율', op: 'max', value: 1.4 },
+      { metric: '시가총액', op: 'range', value: [500 * 100_000_000, 2500 * 100_000_000] }
+    ],
+    4: [
+      { metric: 'PBR', op: 'range', value: [0, 0.6] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 6] },
+      { metric: '부채비율', op: 'max', value: 1.2 },
+      { metric: '시가총액', op: 'range', value: [800 * 100_000_000, 2000 * 100_000_000] },
+      { metric: '거래대금', op: 'min', value: 8 * 100_000_000 }
+    ],
+    5: [
+      { metric: 'PBR', op: 'range', value: [0, 0.5] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 5] },
+      { metric: '부채비율', op: 'max', value: 1.0 },
+      { metric: '시가총액', op: 'range', value: [1000 * 100_000_000, 1500 * 100_000_000] },
+      { metric: '거래대금', op: 'min', value: 10 * 100_000_000 }
+    ]
+  }
+}
+
+function matchesRule(stock: Row, rule: FilterRule): boolean {
+  const rawValue = stock[rule.metric]
+  if (rawValue === undefined || rawValue === null) {
+    return true // 지표 값이 없는 경우 안전하게 패스
+  }
+  const val = typeof rawValue === 'number' ? rawValue : parseFloat(String(rawValue))
+  if (isNaN(val)) {
+    return true
+  }
+
+  if (rule.op === 'min') {
+    return val >= (rule.value as number)
+  }
+  if (rule.op === 'max') {
+    return val <= (rule.value as number)
+  }
+  if (rule.op === 'range') {
+    const [min, max] = rule.value as [number, number]
+    return val >= min && val <= max
+  }
+  return true
+}
+
+function filterStocks(stocks: Row[], screenerKey: string, step: number): Row[] {
+  if (step === 0) return stocks
+  const rules = SCREENER_RULES[screenerKey]?.[step]
+  if (!rules || rules.length === 0) return stocks
+
+  return stocks.filter((stock) => {
+    return rules.every((rule) => matchesRule(stock, rule))
+  })
+}
 
 export function ScreenerDataTable({
   screenerKey,
@@ -52,6 +576,12 @@ export function ScreenerDataTable({
   const [picks, setPicks] = useState<GuruPicks | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [reloadKey, setReloadKey] = useState(0)
+  const [sliderValue, setSliderValue] = useState<number>(0)
+
+  // 거장이 바뀌면 슬라이더를 0단계로 초기화
+  useEffect(() => {
+    setSliderValue(0)
+  }, [screenerKey])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -67,25 +597,94 @@ export function ScreenerDataTable({
     return () => controller.abort()
   }, [screenerKey, nation, reloadKey])
 
+  // 필터링 적용된 종목 리스트 연산
+  const filteredStocks = useMemo(() => {
+    if (!picks) return []
+    const rawRows: Row[] = picks.stocks.map((stock) => ({
+      ...stock,
+      changePercent: changeRate(stock.price, stock.prevClose),
+    }))
+    return filterStocks(rawRows, screenerKey, sliderValue)
+  }, [picks, screenerKey, sliderValue])
+
+  // ResultTable에 전달할 mock picks 객체 생성
+  const filteredPicks = useMemo<GuruPicks | null>(() => {
+    if (!picks) return null
+    return {
+      ...picks,
+      stocks: filteredStocks as Stock[],
+    }
+  }, [picks, filteredStocks])
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
+      {/* 슬라이더 컨트롤러 및 정보 영역 */}
+      {state === 'ready' && picks && (
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-foreground flex items-center gap-1">
+              🔧 조건 강화 옵션
+              {sliderValue > 0 && (
+                <span className="inline-flex items-center rounded-sm bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                  {sliderValue}단계 강화 적용중
+                </span>
+              )}
+            </span>
+            <span className="text-xs text-muted-foreground font-mono">{sliderValue} / 5 단계</span>
+          </div>
+          
+          <div className="flex items-center gap-4 py-1">
+            <Slider
+              value={[sliderValue]}
+              onValueChange={(val) => setSliderValue(val[0])}
+              min={0}
+              max={5}
+              step={1}
+              className="flex-1"
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground px-0.5 font-medium">
+            <span>0단계 (기본 필터)</span>
+            <span>1단계</span>
+            <span>2단계</span>
+            <span>3단계</span>
+            <span>4단계</span>
+            <span>5단계 (최대 조건 강화)</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <ResultCount picks={state === 'ready' ? picks : null} />
+        <ResultCount
+          totalCount={picks ? picks.totalCount : 0}
+          filteredCount={filteredStocks.length}
+          hasData={state === 'ready' && !!picks}
+        />
         <NationToggle nation={nation} onChange={setNation} />
       </div>
 
       {state === 'loading' && <ResultSkeleton />}
       {state === 'error' && <ErrorState onRetry={() => setReloadKey((k) => k + 1)} />}
-      {state === 'ready' && picks && <ResultTable picks={picks} />}
+      {state === 'ready' && filteredPicks && <ResultTable picks={filteredPicks} />}
     </div>
   )
 }
 
-function ResultCount({ picks }: { picks: GuruPicks | null }) {
-  if (!picks) return <span />
+function ResultCount({
+  totalCount,
+  filteredCount,
+  hasData,
+}: {
+  totalCount: number
+  filteredCount: number
+  hasData: boolean
+}) {
+  if (!hasData) return <span />
   return (
     <p className="text-[0.6875rem] text-muted-foreground">
-      조건을 통과한 종목 {picks.totalCount.toLocaleString('ko-KR')}개
+      조건을 통과한 종목 {filteredCount.toLocaleString('ko-KR')}개
+      {totalCount !== filteredCount && ` (기본 조건 통과 ${totalCount.toLocaleString('ko-KR')}개 중)`}
     </p>
   )
 }
