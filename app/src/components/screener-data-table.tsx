@@ -52,33 +52,33 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
   '공통': {
     0: [],
     1: [
-      { metric: '영업_이익률', op: 'min', value: 0.11 },
+      { metric: '영업이익률', op: 'min', value: 0.11 },
       { metric: 'ROE', op: 'min', value: 0.11 }
     ],
     2: [
-      { metric: '영업_이익률', op: 'min', value: 0.12 },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
       { metric: 'ROE', op: 'min', value: 0.12 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 }
+      { metric: '이자보상배율', op: 'min', value: 4.0 }
     ],
     3: [
-      { metric: '영업_이익률', op: 'min', value: 0.13 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
       { metric: 'ROE', op: 'min', value: 0.13 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
       { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
     ],
     4: [
-      { metric: '영업_이익률', op: 'min', value: 0.14 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
       { metric: 'ROE', op: 'min', value: 0.14 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
       { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     5: [
-      { metric: '영업_이익률', op: 'min', value: 0.15 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
       { metric: 'ROE', op: 'min', value: 0.15 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
       { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.8 }
+      { metric: '부채비율', op: 'max', value: 0.8 }
     ]
   },
   '그레이엄': {
@@ -90,27 +90,27 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
     2: [
       { metric: 'PER', op: 'range', value: [0, 13] },
       { metric: 'PBR', op: 'range', value: [0, 1.3] },
-      { metric: '유동_비율', op: 'min', value: 2.1 }
+      { metric: '유동비율', op: 'min', value: 2.1 }
     ],
     3: [
       { metric: 'PER', op: 'range', value: [0, 12] },
       { metric: 'PBR', op: 'range', value: [0, 1.2] },
-      { metric: '유동_비율', op: 'min', value: 2.2 },
+      { metric: '유동비율', op: 'min', value: 2.2 },
       { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
     ],
     4: [
       { metric: 'PER', op: 'range', value: [0, 11] },
       { metric: 'PBR', op: 'range', value: [0, 1.1] },
-      { metric: '유동_비율', op: 'min', value: 2.3 },
+      { metric: '유동비율', op: 'min', value: 2.3 },
       { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     5: [
       { metric: 'PER', op: 'range', value: [0, 10] },
       { metric: 'PBR', op: 'range', value: [0, 1.0] },
-      { metric: '유동_비율', op: 'min', value: 2.5 },
+      { metric: '유동비율', op: 'min', value: 2.5 },
       { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.8 }
+      { metric: '부채비율', op: 'max', value: 0.8 }
     ]
   },
   '클라먼': {
@@ -118,34 +118,34 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
     1: [
       { metric: 'PBR', op: 'range', value: [0, 0.9] },
       { metric: 'PER', op: 'range', value: [0, 9] },
-      { metric: '영업_이익률', op: 'min', value: 0.11 }
+      { metric: '영업이익률', op: 'min', value: 0.11 }
     ],
     2: [
       { metric: 'PBR', op: 'range', value: [0, 0.8] },
       { metric: 'PER', op: 'range', value: [0, 8] },
-      { metric: '영업_이익률', op: 'min', value: 0.12 },
-      { metric: '이자_보상_배율', op: 'min', value: 6.0 }
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '이자보상배율', op: 'min', value: 6.0 }
     ],
     3: [
       { metric: 'PBR', op: 'range', value: [0, 0.7] },
       { metric: 'PER', op: 'range', value: [0, 7] },
-      { metric: '영업_이익률', op: 'min', value: 0.13 },
-      { metric: '이자_보상_배율', op: 'min', value: 7.0 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '이자보상배율', op: 'min', value: 7.0 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     4: [
       { metric: 'PBR', op: 'range', value: [0, 0.6] },
       { metric: 'PER', op: 'range', value: [0, 6] },
-      { metric: '영업_이익률', op: 'min', value: 0.14 },
-      { metric: '이자_보상_배율', op: 'min', value: 8.0 },
-      { metric: '부채_비율', op: 'max', value: 0.8 }
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '이자보상배율', op: 'min', value: 8.0 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
     ],
     5: [
       { metric: 'PBR', op: 'range', value: [0, 0.5] },
       { metric: 'PER', op: 'range', value: [0, 5] },
-      { metric: '영업_이익률', op: 'min', value: 0.15 },
-      { metric: '이자_보상_배율', op: 'min', value: 10.0 },
-      { metric: '부채_비율', op: 'max', value: 0.7 }
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '이자보상배율', op: 'min', value: 10.0 },
+      { metric: '부채비율', op: 'max', value: 0.7 }
     ]
   },
   '파브라이': {
@@ -159,60 +159,60 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
       { metric: 'PER', op: 'range', value: [0, 8] },
       { metric: 'PBR', op: 'range', value: [0, 0.8] },
       { metric: 'ROE', op: 'min', value: 0.07 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 }
+      { metric: '이자보상배율', op: 'min', value: 4.0 }
     ],
     3: [
       { metric: 'PER', op: 'range', value: [0, 7] },
       { metric: 'PBR', op: 'range', value: [0, 0.7] },
       { metric: 'ROE', op: 'min', value: 0.08 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
       { metric: '시가총액', op: 'min', value: 1500 * 100_000_000 }
     ],
     4: [
       { metric: 'PER', op: 'range', value: [0, 6] },
       { metric: 'PBR', op: 'range', value: [0, 0.6] },
       { metric: 'ROE', op: 'min', value: 0.09 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
       { metric: '시가총액', op: 'min', value: 2000 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     5: [
       { metric: 'PER', op: 'range', value: [0, 5] },
       { metric: 'PBR', op: 'range', value: [0, 0.5] },
       { metric: 'ROE', op: 'min', value: 0.10 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
       { metric: '시가총액', op: 'min', value: 2500 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.8 }
+      { metric: '부채비율', op: 'max', value: 0.8 }
     ]
   },
   '그린블라트': {
     0: [],
     1: [
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 9] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 9] },
       { metric: 'ROA', op: 'min', value: 0.11 },
-      { metric: '영업_이익률', op: 'min', value: 0.11 }
+      { metric: '영업이익률', op: 'min', value: 0.11 }
     ],
     2: [
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 8] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 8] },
       { metric: 'ROA', op: 'min', value: 0.12 },
-      { metric: '영업_이익률', op: 'min', value: 0.12 }
+      { metric: '영업이익률', op: 'min', value: 0.12 }
     ],
     3: [
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 7] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 7] },
       { metric: 'ROA', op: 'min', value: 0.13 },
-      { metric: '영업_이익률', op: 'min', value: 0.13 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
       { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
     ],
     4: [
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 6] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 6] },
       { metric: 'ROA', op: 'min', value: 0.14 },
-      { metric: '영업_이익률', op: 'min', value: 0.14 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
       { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 }
     ],
     5: [
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 5] },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 5] },
       { metric: 'ROA', op: 'min', value: 0.15 },
-      { metric: '영업_이익률', op: 'min', value: 0.15 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
       { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 }
     ]
   },
@@ -221,32 +221,32 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
     1: [
       { metric: 'PER', op: 'range', value: [0, 14] },
       { metric: 'ROE', op: 'min', value: 0.11 },
-      { metric: '이자_보상_배율', op: 'min', value: 6.0 }
+      { metric: '이자보상배율', op: 'min', value: 6.0 }
     ],
     2: [
       { metric: 'PER', op: 'range', value: [0, 13] },
       { metric: 'ROE', op: 'min', value: 0.12 },
-      { metric: '이자_보상_배율', op: 'min', value: 7.0 }
+      { metric: '이자보상배율', op: 'min', value: 7.0 }
     ],
     3: [
       { metric: 'PER', op: 'range', value: [0, 12] },
       { metric: 'ROE', op: 'min', value: 0.13 },
-      { metric: '이자_보상_배율', op: 'min', value: 8.0 },
-      { metric: '부채_비율', op: 'max', value: 0.9 },
+      { metric: '이자보상배율', op: 'min', value: 8.0 },
+      { metric: '부채비율', op: 'max', value: 0.9 },
       { metric: '시가총액', op: 'min', value: 12000 * 100_000_000 }
     ],
     4: [
       { metric: 'PER', op: 'range', value: [0, 11] },
       { metric: 'ROE', op: 'min', value: 0.14 },
-      { metric: '이자_보상_배율', op: 'min', value: 9.0 },
-      { metric: '부채_비율', op: 'max', value: 0.8 },
+      { metric: '이자보상배율', op: 'min', value: 9.0 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
       { metric: '시가총액', op: 'min', value: 15000 * 100_000_000 }
     ],
     5: [
       { metric: 'PER', op: 'range', value: [0, 10] },
       { metric: 'ROE', op: 'min', value: 0.15 },
-      { metric: '이자_보상_배율', op: 'min', value: 10.0 },
-      { metric: '부채_비율', op: 'max', value: 0.7 },
+      { metric: '이자보상배율', op: 'min', value: 10.0 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
       { metric: '시가총액', op: 'min', value: 20000 * 100_000_000 }
     ]
   },
@@ -254,168 +254,168 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
     0: [],
     1: [
       { metric: '거래대금', op: 'min', value: 120 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.22 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.22 }
     ],
     2: [
       { metric: '거래대금', op: 'min', value: 150 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.25 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.25 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     3: [
       { metric: '거래대금', op: 'min', value: 180 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.28 },
-      { metric: '부채_비율', op: 'max', value: 0.8 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.28 },
+      { metric: '부채비율', op: 'max', value: 0.8 }
     ],
     4: [
       { metric: '거래대금', op: 'min', value: 200 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.30 },
-      { metric: '부채_비율', op: 'max', value: 0.7 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.30 },
+      { metric: '부채비율', op: 'max', value: 0.7 }
     ],
     5: [
       { metric: '거래대금', op: 'min', value: 250 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.35 },
-      { metric: '부채_비율', op: 'max', value: 0.6 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.35 },
+      { metric: '부채비율', op: 'max', value: 0.6 }
     ]
   },
   '버핏': {
     0: [],
     1: [
-      { metric: '매출_총_이익률', op: 'min', value: 0.42 },
+      { metric: '매출총이익률', op: 'min', value: 0.42 },
       { metric: 'ROE', op: 'min', value: 0.16 },
-      { metric: '순_이익률', op: 'min', value: 0.16 }
+      { metric: '순이익률', op: 'min', value: 0.16 }
     ],
     2: [
-      { metric: '매출_총_이익률', op: 'min', value: 0.45 },
+      { metric: '매출총이익률', op: 'min', value: 0.45 },
       { metric: 'ROE', op: 'min', value: 0.17 },
-      { metric: '순_이익률', op: 'min', value: 0.17 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '순이익률', op: 'min', value: 0.17 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     3: [
-      { metric: '매출_총_이익률', op: 'min', value: 0.48 },
+      { metric: '매출총이익률', op: 'min', value: 0.48 },
       { metric: 'ROE', op: 'min', value: 0.18 },
-      { metric: '순_이익률', op: 'min', value: 0.18 },
-      { metric: '부채_비율', op: 'max', value: 0.8 },
+      { metric: '순이익률', op: 'min', value: 0.18 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
       { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
     ],
     4: [
-      { metric: '매출_총_이익률', op: 'min', value: 0.50 },
+      { metric: '매출총이익률', op: 'min', value: 0.50 },
       { metric: 'ROE', op: 'min', value: 0.20 },
-      { metric: '순_이익률', op: 'min', value: 0.20 },
-      { metric: '부채_비율', op: 'max', value: 0.7 },
+      { metric: '순이익률', op: 'min', value: 0.20 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
       { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 }
     ],
     5: [
-      { metric: '매출_총_이익률', op: 'min', value: 0.55 },
+      { metric: '매출총이익률', op: 'min', value: 0.55 },
       { metric: 'ROE', op: 'min', value: 0.22 },
-      { metric: '순_이익률', op: 'min', value: 0.22 },
-      { metric: '부채_비율', op: 'max', value: 0.6 },
+      { metric: '순이익률', op: 'min', value: 0.22 },
+      { metric: '부채비율', op: 'max', value: 0.6 },
       { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 }
     ]
   },
   '피셔': {
     0: [],
     1: [
-      { metric: '연평균_매출액_증감률', op: 'min', value: 0.22 },
-      { metric: '영업_이익률', op: 'min', value: 0.11 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.11 },
-      { metric: '부채_비율', op: 'max', value: 1.8 }
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.22 },
+      { metric: '영업이익률', op: 'min', value: 0.11 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.11 },
+      { metric: '부채비율', op: 'max', value: 1.8 }
     ],
     2: [
-      { metric: '연평균_매출액_증감률', op: 'min', value: 0.25 },
-      { metric: '영업_이익률', op: 'min', value: 0.12 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.12 },
-      { metric: '부채_비율', op: 'max', value: 1.6 }
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.25 },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.12 },
+      { metric: '부채비율', op: 'max', value: 1.6 }
     ],
     3: [
-      { metric: '연평균_매출액_증감률', op: 'min', value: 0.28 },
-      { metric: '영업_이익률', op: 'min', value: 0.13 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.13 },
-      { metric: '부채_비율', op: 'max', value: 1.4 }
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.28 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.13 },
+      { metric: '부채비율', op: 'max', value: 1.4 }
     ],
     4: [
-      { metric: '연평균_매출액_증감률', op: 'min', value: 0.30 },
-      { metric: '영업_이익률', op: 'min', value: 0.14 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.14 },
-      { metric: '부채_비율', op: 'max', value: 1.2 }
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.30 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.14 },
+      { metric: '부채비율', op: 'max', value: 1.2 }
     ],
     5: [
-      { metric: '연평균_매출액_증감률', op: 'min', value: 0.35 },
-      { metric: '영업_이익률', op: 'min', value: 0.15 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.15 },
-      { metric: '부채_비율', op: 'max', value: 1.0 }
+      { metric: '연평균 매출액 증감률', op: 'min', value: 0.35 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.15 },
+      { metric: '부채비율', op: 'max', value: 1.0 }
     ]
   },
   '뉴욕주민': {
     0: [],
     1: [
       { metric: 'PER', op: 'range', value: [0, 18] },
-      { metric: '영업_이익률', op: 'min', value: 0.11 },
+      { metric: '영업이익률', op: 'min', value: 0.11 },
       { metric: 'ROE', op: 'min', value: 0.11 }
     ],
     2: [
       { metric: 'PER', op: 'range', value: [0, 16] },
-      { metric: '영업_이익률', op: 'min', value: 0.12 },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
       { metric: 'ROE', op: 'min', value: 0.12 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 }
+      { metric: '이자보상배율', op: 'min', value: 4.0 }
     ],
     3: [
       { metric: 'PER', op: 'range', value: [0, 15] },
-      { metric: '영업_이익률', op: 'min', value: 0.13 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
       { metric: 'ROE', op: 'min', value: 0.13 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
       { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     4: [
       { metric: 'PER', op: 'range', value: [0, 14] },
-      { metric: '영업_이익률', op: 'min', value: 0.14 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
       { metric: 'ROE', op: 'min', value: 0.14 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
       { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.8 }
+      { metric: '부채비율', op: 'max', value: 0.8 }
     ],
     5: [
       { metric: 'PER', op: 'range', value: [0, 12] },
-      { metric: '영업_이익률', op: 'min', value: 0.15 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
       { metric: 'ROE', op: 'min', value: 0.15 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
       { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
-      { metric: '부채_비율', op: 'max', value: 0.7 }
+      { metric: '부채비율', op: 'max', value: 0.7 }
     ]
   },
   '린치': {
     0: [],
     1: [
       { metric: 'PER', op: 'range', value: [0, 18] },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.22 },
-      { metric: '영업_이익률', op: 'min', value: 0.11 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.22 },
+      { metric: '영업이익률', op: 'min', value: 0.11 }
     ],
     2: [
       { metric: 'PER', op: 'range', value: [0, 16] },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.25 },
-      { metric: '영업_이익률', op: 'min', value: 0.12 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.25 },
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     3: [
       { metric: 'PER', op: 'range', value: [0, 15] },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.28 },
-      { metric: '영업_이익률', op: 'min', value: 0.13 },
-      { metric: '부채_비율', op: 'max', value: 0.8 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.28 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
       { metric: '시가총액', op: 'min', value: 1500 * 100_000_000 }
     ],
     4: [
       { metric: 'PER', op: 'range', value: [0, 14] },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.30 },
-      { metric: '영업_이익률', op: 'min', value: 0.14 },
-      { metric: '부채_비율', op: 'max', value: 0.7 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.30 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
       { metric: '시가총액', op: 'min', value: 2000 * 100_000_000 },
       { metric: '거래대금', op: 'min', value: 8 * 100_000_000 }
     ],
     5: [
       { metric: 'PER', op: 'range', value: [0, 12] },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.35 },
-      { metric: '영업_이익률', op: 'min', value: 0.15 },
-      { metric: '부채_비율', op: 'max', value: 0.6 },
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.35 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '부채비율', op: 'max', value: 0.6 },
       { metric: '시가총액', op: 'min', value: 2500 * 100_000_000 },
       { metric: '거래대금', op: 'min', value: 10 * 100_000_000 }
     ]
@@ -426,74 +426,74 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
       { metric: 'PER', op: 'range', value: [0, 14] },
       { metric: 'PBR', op: 'range', value: [0, 1.4] },
       { metric: 'ROE', op: 'min', value: 0.11 },
-      { metric: '영업_이익률', op: 'min', value: 0.11 }
+      { metric: '영업이익률', op: 'min', value: 0.11 }
     ],
     2: [
       { metric: 'PER', op: 'range', value: [0, 13] },
       { metric: 'PBR', op: 'range', value: [0, 1.3] },
       { metric: 'ROE', op: 'min', value: 0.12 },
-      { metric: '영업_이익률', op: 'min', value: 0.12 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 },
-      { metric: '부채_비율', op: 'max', value: 1.8 }
+      { metric: '영업이익률', op: 'min', value: 0.12 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 1.8 }
     ],
     3: [
       { metric: 'PER', op: 'range', value: [0, 12] },
       { metric: 'PBR', op: 'range', value: [0, 1.2] },
       { metric: 'ROE', op: 'min', value: 0.13 },
-      { metric: '영업_이익률', op: 'min', value: 0.13 },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 },
-      { metric: '부채_비율', op: 'max', value: 1.6 },
+      { metric: '영업이익률', op: 'min', value: 0.13 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 1.6 },
       { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.11 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.11 }
     ],
     4: [
       { metric: 'PER', op: 'range', value: [0, 11] },
       { metric: 'PBR', op: 'range', value: [0, 1.1] },
       { metric: 'ROE', op: 'min', value: 0.14 },
-      { metric: '영업_이익률', op: 'min', value: 0.14 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
-      { metric: '부채_비율', op: 'max', value: 1.4 },
+      { metric: '영업이익률', op: 'min', value: 0.14 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 1.4 },
       { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.12 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.12 }
     ],
     5: [
       { metric: 'PER', op: 'range', value: [0, 10] },
       { metric: 'PBR', op: 'range', value: [0, 1.0] },
       { metric: 'ROE', op: 'min', value: 0.15 },
-      { metric: '영업_이익률', op: 'min', value: 0.15 },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
-      { metric: '부채_비율', op: 'max', value: 1.0 },
+      { metric: '영업이익률', op: 'min', value: 0.15 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 1.0 },
       { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 },
-      { metric: '연평균_순이익_증감률', op: 'min', value: 0.15 }
+      { metric: '연평균 순이익 증감률', op: 'min', value: 0.15 }
     ]
   },
   '템플턴': {
     0: [],
     1: [
       { metric: 'PER', op: 'range', value: [0, 18] },
-      { metric: '이자_보상_배율', op: 'min', value: 3.5 }
+      { metric: '이자보상배율', op: 'min', value: 3.5 }
     ],
     2: [
       { metric: 'PER', op: 'range', value: [0, 16] },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 },
-      { metric: '부채_비율', op: 'max', value: 0.9 }
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 0.9 }
     ],
     3: [
       { metric: 'PER', op: 'range', value: [0, 15] },
-      { metric: '이자_보상_배율', op: 'min', value: 4.0 },
-      { metric: '부채_비율', op: 'max', value: 0.8 },
+      { metric: '이자보상배율', op: 'min', value: 4.0 },
+      { metric: '부채비율', op: 'max', value: 0.8 },
       { metric: '시가총액', op: 'min', value: 4000 * 100_000_000 }
     ],
     4: [
       { metric: 'PER', op: 'range', value: [0, 14] },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
-      { metric: '부채_비율', op: 'max', value: 0.7 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 0.7 },
       { metric: '시가총액', op: 'min', value: 4500 * 100_000_000 }
     ],
     5: [
       { metric: 'PER', op: 'range', value: [0, 12] },
-      { metric: '이자_보상_배율', op: 'min', value: 5.0 },
-      { metric: '부채_비율', op: 'max', value: 0.6 },
+      { metric: '이자보상배율', op: 'min', value: 5.0 },
+      { metric: '부채비율', op: 'max', value: 0.6 },
       { metric: '시가총액', op: 'min', value: 5000 * 100_000_000 }
     ]
   },
@@ -501,31 +501,31 @@ const SCREENER_RULES: Record<string, Record<number, FilterRule[]>> = {
     0: [],
     1: [
       { metric: 'PBR', op: 'range', value: [0, 0.9] },
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 9] },
-      { metric: '부채_비율', op: 'max', value: 1.8 }
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 9] },
+      { metric: '부채비율', op: 'max', value: 1.8 }
     ],
     2: [
       { metric: 'PBR', op: 'range', value: [0, 0.8] },
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 8] },
-      { metric: '부채_비율', op: 'max', value: 1.6 }
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 8] },
+      { metric: '부채비율', op: 'max', value: 1.6 }
     ],
     3: [
       { metric: 'PBR', op: 'range', value: [0, 0.7] },
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 7] },
-      { metric: '부채_비율', op: 'max', value: 1.4 },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 7] },
+      { metric: '부채비율', op: 'max', value: 1.4 },
       { metric: '시가총액', op: 'range', value: [500 * 100_000_000, 2500 * 100_000_000] }
     ],
     4: [
       { metric: 'PBR', op: 'range', value: [0, 0.6] },
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 6] },
-      { metric: '부채_비율', op: 'max', value: 1.2 },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 6] },
+      { metric: '부채비율', op: 'max', value: 1.2 },
       { metric: '시가총액', op: 'range', value: [800 * 100_000_000, 2000 * 100_000_000] },
       { metric: '거래대금', op: 'min', value: 8 * 100_000_000 }
     ],
     5: [
       { metric: 'PBR', op: 'range', value: [0, 0.5] },
-      { metric: 'EV_EBITDA', op: 'range', value: [0, 5] },
-      { metric: '부채_비율', op: 'max', value: 1.0 },
+      { metric: 'EV/EBITDA', op: 'range', value: [0, 5] },
+      { metric: '부채비율', op: 'max', value: 1.0 },
       { metric: '시가총액', op: 'range', value: [1000 * 100_000_000, 1500 * 100_000_000] },
       { metric: '거래대금', op: 'min', value: 10 * 100_000_000 }
     ]
