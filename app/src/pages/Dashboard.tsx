@@ -29,6 +29,13 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { MarkdownView } from '@/components/markdown-view'
 import { ScreenerDataTable } from '@/components/screener-data-table'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useSetTitle } from '@/components/title-context'
 import krLogoData from '../../../docs/kr_logo.json'
 import usLogoData from '../../../docs/us_logo.json'
@@ -415,18 +422,19 @@ function MainView({
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="text-xs text-muted-foreground font-medium">대상 필터 선택:</span>
-                <select
-                  value={selectedScreener}
-                  onChange={(e) => setSelectedScreener(e.target.value)}
-                  className="h-8 rounded-md border border-input bg-card px-2 py-1 text-xs shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring text-foreground font-medium cursor-pointer"
-                >
-                  <option value="공통">종합 (13인 공통분모)</option>
-                  {GURUS_INFO.map((guru) => (
-                    <option key={guru.key} value={guru.screenerKey}>
-                      {guru.name} ({guru.style.split(' / ')[0]})
-                    </option>
-                  ))}
-                </select>
+                <Select value={selectedScreener} onValueChange={setSelectedScreener}>
+                  <SelectTrigger className="h-7 w-[180px] text-xs">
+                    <SelectValue placeholder="필터 선택" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="공통">종합 (13인 공통분모)</SelectItem>
+                    {GURUS_INFO.map((guru) => (
+                      <SelectItem key={guru.key} value={guru.screenerKey}>
+                        {guru.name} ({guru.style.split(' / ')[0]})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <ScreenerDataTable screenerKey={selectedScreener} />
