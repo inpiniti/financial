@@ -454,7 +454,7 @@ function MainView({
                 </Select>
               </div>
             </div>
-            <ScreenerDataTable screenerKey={selectedScreener} />
+            <ScreenerDataTable screenerKey={selectedScreener} onSelectTicker={onSelectTicker} />
           </div>
         </TabsContent>
       </Tabs>
@@ -591,7 +591,7 @@ function GuruDetailView({
             {guruInfo.name}의 투자 기준을 통과한 종목들이에요. 국내·해외를 골라서 살펴보세요.
           </p>
         </div>
-        <ScreenerDataTable screenerKey={guruInfo.screenerKey} />
+        <ScreenerDataTable screenerKey={guruInfo.screenerKey} onSelectTicker={onSelectTicker} />
       </div>
 
       {/* 거장 분석/추천 종목 리스트 */}
@@ -689,6 +689,9 @@ function TickerDetailView({
         </p>
       </header>
 
+      {reportsForTicker.length === 0 ? (
+        <EmptyState message="보고서가 없습니다." />
+      ) : (
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-max text-xs text-left">
@@ -747,6 +750,7 @@ function TickerDetailView({
           </table>
         </div>
       </div>
+      )}
     </div>
   )
 }

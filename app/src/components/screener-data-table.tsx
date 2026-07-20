@@ -568,9 +568,11 @@ function filterStocks(stocks: Row[], screenerKey: string, step: number): Row[] {
 export function ScreenerDataTable({
   screenerKey,
   initialNation = 'kr',
+  onSelectTicker,
 }: {
   screenerKey: string
   initialNation?: Nation
+  onSelectTicker?: (ticker: string) => void
 }) {
   const [nation, setNation] = useState<Nation>(initialNation)
   const [picks, setPicks] = useState<GuruPicks | null>(null)
@@ -666,7 +668,9 @@ export function ScreenerDataTable({
 
       {state === 'loading' && <ResultSkeleton />}
       {state === 'error' && <ErrorState onRetry={() => setReloadKey((k) => k + 1)} />}
-      {state === 'ready' && filteredPicks && <ResultTable picks={filteredPicks} />}
+      {state === 'ready' && filteredPicks && (
+        <ResultTable picks={filteredPicks} onSelectTicker={onSelectTicker} />
+      )}
     </div>
   )
 }
@@ -711,7 +715,13 @@ function NationToggle({ nation, onChange }: { nation: Nation; onChange: (n: Nati
   )
 }
 
-function ResultTable({ picks }: { picks: GuruPicks }) {
+function ResultTable({
+  picks,
+  onSelectTicker,
+}: {
+  picks: GuruPicks
+  onSelectTicker?: (ticker: string) => void
+}) {
   const [sorting, setSorting] = useState<SortingState>([])
 
   const rows = useMemo<Row[]>(
@@ -837,18 +847,26 @@ function ResultTable({ picks }: { picks: GuruPicks }) {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell
-                  key={cell.id}
-                  className={cn(cell.column.id !== 'stock' && 'text-right')}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
+          {table.getRowModel().rows.map((row) => {
+            const ticker = row.original.ticker
+            const clickable = !!onSelectTicker && !!ticker
+            return (
+              <TableRow
+                key={row.id}
+                onClick={clickable ? () => onSelectTicker!(ticker) : undefined}
+                className={cn(clickable && 'cursor-pointer hover:bg-muted/40')}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    className={cn(cell.column.id !== 'stock' && 'text-right')}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </div>
