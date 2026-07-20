@@ -793,7 +793,8 @@ function ReportDetailView({
         icon: UserFreeIcons
       }) as DocEntry),
       bottom: [
-        { kind: 'data', key: 'data', label: '데이터 팩', disabled: !report.data, icon: Database01FreeIcons } as DocEntry
+        { kind: 'data', key: 'data', label: '데이터 팩', disabled: !report.data, icon: Database01FreeIcons } as DocEntry,
+        { kind: 'valueDrivers', key: 'valueDrivers', label: '가치 드라이버', disabled: !report.valueDrivers, icon: LayersFreeIcons } as DocEntry
       ],
     }
   }, [report])
@@ -810,6 +811,7 @@ function ReportDetailView({
     if (selectedDoc === 'final') return report.final
     if (selectedDoc === 'debate') return report.debate
     if (selectedDoc === 'data') return report.data
+    if (selectedDoc === 'valueDrivers') return report.valueDrivers
     return report.gurus.find((g) => g.folder === selectedDoc)?.load
   }, [report, selectedDoc])
 
