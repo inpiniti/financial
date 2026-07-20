@@ -39,6 +39,7 @@ export interface TickerReport {
   name: string // interest ticker 매핑, 없으면 ticker 그대로
   gurus: GuruReport[] // 거장 보고서들 (표시명 정렬)
   data?: RawLoader // _data/{ticker}.md
+  valueDrivers?: RawLoader // _data/{ticker}_VALUE_DRIVERS.md (신규)
   final?: RawLoader // 최종/{ticker}_최종보고서.md
   debate?: RawLoader // 최종/{ticker}_토론.md
   status: 'final' | 'in-progress' // 최종보고서 존재 여부
@@ -53,6 +54,7 @@ export type ReportCatalog = Map<string, TickerReport[]>
 type ParsedPath =
   | { kind: 'guru'; date: string; ticker: string; folder: string; path: string }
   | { kind: 'data'; date: string; ticker: string; path: string }
+  | { kind: 'value-drivers'; date: string; ticker: string; path: string }
   | { kind: 'final'; date: string; ticker: string; path: string }
   | { kind: 'debate'; date: string; ticker: string; path: string }
   | null
@@ -75,6 +77,10 @@ function parseReportPath(rawPath: string): ParsedPath {
   const base = file.replace(/\.md$/i, '')
 
   if (author === '_data') {
+    if (base.endsWith('_VALUE_DRIVERS')) {
+      const ticker = base.slice(0, -'_VALUE_DRIVERS'.length)
+      return { kind: 'value-drivers', date, ticker, path: rawPath }
+    }
     return { kind: 'data', date, ticker: base, path: rawPath }
   }
 
@@ -100,6 +106,7 @@ interface TickerAccumulator {
   ticker: string
   gurus: { folder: string; path: string }[]
   dataPath?: string
+  valueDriversPath?: string
   finalPath?: string
   debatePath?: string
 }
@@ -147,6 +154,9 @@ export async function buildCatalog(
         break
       case 'data':
         acc.dataPath = parsed.path
+        break
+      case 'value-drivers':
+        acc.valueDriversPath = parsed.path
         break
       case 'final':
         acc.finalPath = parsed.path
@@ -202,6 +212,7 @@ export async function buildCatalog(
       }
 
       if (acc.dataPath) report.data = () => loadRaw(acc.dataPath!)
+      if (acc.valueDriversPath) report.valueDrivers = () => loadRaw(acc.valueDriversPath!)
       if (acc.debatePath) report.debate = () => loadRaw(acc.debatePath!)
 
       if (acc.finalPath) {
