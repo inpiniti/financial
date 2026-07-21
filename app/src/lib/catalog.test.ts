@@ -52,16 +52,26 @@ for (const g of GURU_FOLDERS) {
 }
 files.set(base('_data', '000660.md'), '# 000660 데이터 팩')
 
+// NVDA — _data + 요약 파일만 있고 최종/토론 없음 (요약이 별도 티커로 잡히면 안 됨)
+files.set(base('_data', 'NVDA.md'), '# NVDA 데이터 팩')
+files.set(base('_data', 'NVDA_요약.md'), '# NVDA 13인 거장 요약\n본문')
+
+// AMZN — 최종보고서는 있지만 토론 파일은 없는 케이스 (원탁토론 링크가 파일 존재와 무관하게 뜨는 버그 재현용)
+files.set(
+  base('최종', 'AMZN_최종보고서.md'),
+  '# AMZN 최종 투자 보고서\n> 날짜: 2026-07-10 | 종합 의견: **매수** | 표결: 매수 5·보유 3·매도 2·관망 3\n\n본문',
+)
+
 const paths = [...files.keys()]
 const loadRaw = async (p: string) => files.get(p) ?? ''
 const names = parseTickerMap('005930 : 삼성전자\n000660 : 하이닉스')
 
 describe('buildCatalog', () => {
-  it('날짜 키에 티커 2개를 담는다', async () => {
+  it('날짜 키에 등장한 모든 고유 티커를 담는다', async () => {
     const cat = await buildCatalog(paths, loadRaw, names)
     const reports = cat.get(DATE)
     expect(reports).toBeDefined()
-    expect(reports!.map((r) => r.ticker).sort()).toEqual(['000660', '005930'])
+    expect(reports!.map((r) => r.ticker).sort()).toEqual(['000660', '005930', 'AMZN', 'NVDA'])
   })
 
   it('interest ticker 매핑으로 name을 채운다', async () => {
@@ -137,6 +147,26 @@ describe('buildCatalog', () => {
 
   it('알 수 없는 경로는 조용히 무시 (throw 없음)', async () => {
     const cat = await buildCatalog(['garbage', '/no/report/here.md', ...paths], loadRaw, names)
-    expect(cat.get(DATE)!.length).toBe(2)
+    expect(cat.get(DATE)!.length).toBe(4)
+  })
+
+  it('_요약.md는 별도 티커로 잡히지 않고 원본 티커의 summary 로더로 연결된다', async () => {
+    const cat = await buildCatalog(paths, loadRaw, names)
+    const reports = cat.get(DATE)!
+    // 'NVDA_요약' 이라는 가짜 티커가 생기면 안 됨
+    expect(reports.some((r) => r.ticker === 'NVDA_요약')).toBe(false)
+
+    const nvda = reports.find((r) => r.ticker === 'NVDA')!
+    expect(nvda).toBeDefined()
+    expect(nvda.summary).toBeTypeOf('function')
+    await expect(nvda.summary!()).resolves.toContain('거장 요약')
+  })
+
+  it('최종보고서만 있고 토론 파일이 없으면 status는 final이지만 debate는 undefined', async () => {
+    const cat = await buildCatalog(paths, loadRaw, names)
+    const amzn = cat.get(DATE)!.find((r) => r.ticker === 'AMZN')!
+    expect(amzn.status).toBe('final')
+    expect(amzn.final).toBeTypeOf('function')
+    expect(amzn.debate).toBeUndefined()
   })
 })

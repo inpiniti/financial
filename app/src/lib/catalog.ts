@@ -40,6 +40,7 @@ export interface TickerReport {
   gurus: GuruReport[] // 거장 보고서들 (표시명 정렬)
   data?: RawLoader // _data/{ticker}.md
   valueDrivers?: RawLoader // _data/{ticker}_VALUE_DRIVERS.md (신규)
+  summary?: RawLoader // _data/{ticker}_요약.md (13인 요약, 상세 화면에서만 노출)
   final?: RawLoader // 최종/{ticker}_최종보고서.md
   debate?: RawLoader // 최종/{ticker}_토론.md
   status: 'final' | 'in-progress' // 최종보고서 존재 여부
@@ -55,6 +56,7 @@ type ParsedPath =
   | { kind: 'guru'; date: string; ticker: string; folder: string; path: string }
   | { kind: 'data'; date: string; ticker: string; path: string }
   | { kind: 'value-drivers'; date: string; ticker: string; path: string }
+  | { kind: 'summary'; date: string; ticker: string; path: string }
   | { kind: 'final'; date: string; ticker: string; path: string }
   | { kind: 'debate'; date: string; ticker: string; path: string }
   | null
@@ -80,6 +82,10 @@ function parseReportPath(rawPath: string): ParsedPath {
     if (base.endsWith('_VALUE_DRIVERS')) {
       const ticker = base.slice(0, -'_VALUE_DRIVERS'.length)
       return { kind: 'value-drivers', date, ticker, path: rawPath }
+    }
+    if (base.endsWith('_요약')) {
+      const ticker = base.slice(0, -'_요약'.length)
+      return { kind: 'summary', date, ticker, path: rawPath }
     }
     return { kind: 'data', date, ticker: base, path: rawPath }
   }
@@ -107,6 +113,7 @@ interface TickerAccumulator {
   gurus: { folder: string; path: string }[]
   dataPath?: string
   valueDriversPath?: string
+  summaryPath?: string
   finalPath?: string
   debatePath?: string
 }
@@ -157,6 +164,9 @@ export async function buildCatalog(
         break
       case 'value-drivers':
         acc.valueDriversPath = parsed.path
+        break
+      case 'summary':
+        acc.summaryPath = parsed.path
         break
       case 'final':
         acc.finalPath = parsed.path
@@ -213,6 +223,7 @@ export async function buildCatalog(
 
       if (acc.dataPath) report.data = () => loadRaw(acc.dataPath!)
       if (acc.valueDriversPath) report.valueDrivers = () => loadRaw(acc.valueDriversPath!)
+      if (acc.summaryPath) report.summary = () => loadRaw(acc.summaryPath!)
       if (acc.debatePath) report.debate = () => loadRaw(acc.debatePath!)
 
       if (acc.finalPath) {

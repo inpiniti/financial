@@ -785,7 +785,7 @@ function ReportDetailView({
     return {
       top: [
         { kind: 'final', key: 'final', label: '최종 보고서', disabled: inProgress, icon: StarFreeIcons } as DocEntry,
-        { kind: 'debate', key: 'debate', label: '원탁 토론', disabled: inProgress, icon: BubbleChatFreeIcons } as DocEntry,
+        { kind: 'debate', key: 'debate', label: '원탁 토론', disabled: inProgress || !report.debate, icon: BubbleChatFreeIcons } as DocEntry,
       ],
       gurus: report.gurus.map((g) => ({
         kind: 'guru',
@@ -798,7 +798,8 @@ function ReportDetailView({
       }) as DocEntry),
       bottom: [
         { kind: 'data', key: 'data', label: '데이터 팩', disabled: !report.data, icon: Database01FreeIcons } as DocEntry,
-        { kind: 'valueDrivers', key: 'valueDrivers', label: '가치 드라이버', disabled: !report.valueDrivers, icon: LayersFreeIcons } as DocEntry
+        { kind: 'valueDrivers', key: 'valueDrivers', label: '가치 드라이버', disabled: !report.valueDrivers, icon: LayersFreeIcons } as DocEntry,
+        { kind: 'summary', key: 'summary', label: '거장 요약', disabled: !report.summary, icon: FileEmpty02FreeIcons } as DocEntry
       ],
     }
   }, [report])
@@ -816,6 +817,7 @@ function ReportDetailView({
     if (selectedDoc === 'debate') return report.debate
     if (selectedDoc === 'data') return report.data
     if (selectedDoc === 'valueDrivers') return report.valueDrivers
+    if (selectedDoc === 'summary') return report.summary
     return report.gurus.find((g) => g.folder === selectedDoc)?.load
   }, [report, selectedDoc])
 
