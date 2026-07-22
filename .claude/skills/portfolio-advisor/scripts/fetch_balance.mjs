@@ -129,8 +129,12 @@ function normalize(raw) {
     holdings,
     cash: (raw.output2 || []).map((c) => ({
       currency: c.crcy_cd,
-      deposit_frcr: num(c.frcr_dncl_amt_2),
-      withdrawable_frcr: num(c.frcr_drwg_psbl_amt_1),
+      deposit_frcr: num(c.frcr_dncl_amt_2), // 외화예수금액2 (외화사용가능금액)
+      withdrawable_frcr: num(c.frcr_drwg_psbl_amt_1), // 외화출금가능금액
+      withdrawable_krw: num(c.frcr_evlu_amt2), // 출금가능원화금액
+      buy_margin_frcr: num(c.frcr_buy_mgn_amt), // 외화매수증거금 (미결제 매수분)
+      nxdy_withdrawable_frcr: num(c.nxdy_frcr_drwg_psbl_amt), // 익일외화출금가능금액
+      fx_rate: num(c.frst_bltn_exrt), // 최초고시환율
     })),
     summary_krw: {
       buy_total: num(s.pchs_amt_smtl),
@@ -138,7 +142,24 @@ function normalize(raw) {
       pl_total: num(s.evlu_pfls_amt_smtl),
       pl_rate_pct: num(s.evlu_erng_rt1),
       total_asset: num(s.tot_asst_amt),
-      deposit_total: num(s.tot_dncl_amt),
+      deposit_krw: num(s.dncl_amt), // 예수금액 (원화)
+      deposit_total: num(s.tot_dncl_amt), // 총예수금액
+      cma_eval: num(s.cma_evlu_amt), // CMA평가금액
+      withdrawable_total: num(s.wdrw_psbl_tot_amt), // 인출가능총금액
+      frcr_usable: num(s.frcr_use_psbl_amt), // 외화사용가능금액
+      frcr_eval_total: num(s.frcr_evlu_tota), // 외화평가총액
+      frcr_balance_total: num(s.tot_frcr_cblc_smtl), // 총외화잔고합계
+      buy_margin: num(s.buy_mgn_amt), // 매수증거금액
+      margin_total: num(s.mgna_tota), // 증거금총액
+      // 가용현금 = 외화사용가능금액(원화환산)만. 원화 총예수금(tot_dncl_amt)은
+      // 성격이 불분명해 현금으로 세지 않는다 (사용자 확인, 2026-07-22).
+      // 외화예수금 중 매수증거금(미결제 매수분)도 해당 주식이 이미 holdings 평가액에
+      // 잡혀 있어 제외. 검증: tot_asst_amt ≈ 주식평가액(KRW) + tot_dncl_amt + frcr_use_psbl_amt
+      usable_cash: num(s.frcr_use_psbl_amt) ?? 0,
+      cash_weight_pct:
+        num(s.tot_asst_amt) > 0
+          ? Math.round(((num(s.frcr_use_psbl_amt) ?? 0) / num(s.tot_asst_amt)) * 1000) / 10
+          : null,
     },
   };
 }
