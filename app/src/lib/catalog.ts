@@ -101,6 +101,9 @@ function parseReportPath(rawPath: string): ParsedPath {
     return null
   }
 
+  // 포트폴리오 조언 문서는 거장 보고서가 아니다 — advice.ts가 별도로 다룬다.
+  if (author === '포트폴리오') return null
+
   // 그 외 = 거장 폴더 (폴더명 = 거장, 파일명 = ticker)
   return { kind: 'guru', date, ticker: base, folder: author, path: rawPath }
 }

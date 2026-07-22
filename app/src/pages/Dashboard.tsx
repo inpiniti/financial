@@ -19,6 +19,8 @@ import {
 
 import { loadCatalog } from '@/lib/catalog'
 import type { ReportCatalog, TickerReport, Verdict, Tally } from '@/lib/catalog'
+import { loadAdvices } from '@/lib/advice'
+import type { AdviceEntry } from '@/lib/advice'
 import { GURUS_INFO } from '@/lib/gurus'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -89,6 +91,7 @@ export default function Dashboard() {
   const selectedDate = searchParams.get('date') || '' // 날짜
   const selectedDoc = searchParams.get('doc') || 'final' // final | debate | data | {guruKey}
   const selectedBook = searchParams.get('book') || '' // 도서 파일명
+  const selectedAdvice = searchParams.get('advice') || '' // 조언 키 ({date}/{filename})
 
   useEffect(() => {
     let alive = true
@@ -186,6 +189,7 @@ export default function Dashboard() {
           onChangeTab={(tab) => pushView({ tab })}
           onSelectGuru={(guru) => pushView({ view: 'guru-detail', guru })}
           onSelectTicker={(ticker) => pushView({ view: 'ticker-detail', ticker })}
+          onSelectAdvice={(advice) => pushView({ view: 'advice-detail', advice })}
         />
       )}
 
@@ -221,6 +225,9 @@ export default function Dashboard() {
 
       {/* 서브뷰: 단일 도서 뷰어 */}
       {view === 'book-detail' && <BookDetailView filename={selectedBook} />}
+
+      {/* 서브뷰: 포트폴리오 조언 뷰어 */}
+      {view === 'advice-detail' && <AdviceDetailView adviceKey={selectedAdvice} />}
     </div>
   )
 }
@@ -242,12 +249,14 @@ function MainView({
   onChangeTab,
   onSelectGuru,
   onSelectTicker,
+  onSelectAdvice,
 }: {
   activeTab: string
   uniqueTickers: TickerRow[]
   onChangeTab: (tab: string) => void
   onSelectGuru: (guru: string) => void
   onSelectTicker: (ticker: string) => void
+  onSelectAdvice: (advice: string) => void
 }) {
   useSetTitle('투자 보고서')
   const [selectedScreener, setSelectedScreener] = useState<string>('공통')
@@ -278,7 +287,7 @@ function MainView({
       </header>
 
       <Tabs value={activeTab} onValueChange={onChangeTab} className="w-full">
-        <TabsList className="grid w-full max-w-[560px] grid-cols-3">
+        <TabsList className="grid w-full max-w-[720px] grid-cols-4">
           <TabsTrigger value="gurus" className="gap-1.5 py-1">
             <HugeiconsIcon icon={UserFreeIcons} className="size-3.5" />
             거장 리스트
@@ -290,6 +299,10 @@ function MainView({
           <TabsTrigger value="screener" className="gap-1.5 py-1">
             <HugeiconsIcon icon={Search01FreeIcons} className="size-3.5" />
             종합 스크리너
+          </TabsTrigger>
+          <TabsTrigger value="advice" className="gap-1.5 py-1">
+            <HugeiconsIcon icon={BubbleChatFreeIcons} className="size-3.5" />
+            조언 리스트
           </TabsTrigger>
         </TabsList>
 
@@ -457,7 +470,122 @@ function MainView({
             <ScreenerDataTable screenerKey={selectedScreener} onSelectTicker={onSelectTicker} />
           </div>
         </TabsContent>
+
+        {/* 조언 리스트 탭 — 실계좌 기반 포트폴리오 조언 보고서 (portfolio-advisor 스킬 산출물) */}
+        <TabsContent value="advice" className="mt-4">
+          <AdviceListView onSelectAdvice={onSelectAdvice} />
+        </TabsContent>
       </Tabs>
+    </div>
+  )
+}
+
+// ── 조언 리스트 뷰 ──────────────────────────────────────────────────────────
+function AdviceListView({ onSelectAdvice }: { onSelectAdvice: (advice: string) => void }) {
+  // glob 키 목록만 쓰므로 동기 — 본문은 상세 뷰에서 lazy 로딩된다.
+  const advices = useMemo<AdviceEntry[]>(() => loadAdvices(), [])
+
+  if (advices.length === 0) {
+    return <EmptyState message="저장된 포트폴리오 조언이 없습니다. portfolio-advisor 스킬로 생성할 수 있어요." />
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-max text-xs text-left">
+          <thead className="border-b border-border bg-muted/50 text-[0.6875rem] font-medium text-muted-foreground uppercase tracking-wider">
+            <tr>
+              <th className="px-4 py-3 font-semibold">조언 일자</th>
+              <th className="px-4 py-3 font-semibold">문서</th>
+              <th className="px-4 py-3 text-right"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {advices.map((a) => (
+              <tr
+                key={`${a.date}/${a.filename}`}
+                onClick={() => onSelectAdvice(`${a.date}/${a.filename}`)}
+                className="hover:bg-muted/40 cursor-pointer transition-colors"
+              >
+                <td className="px-4 py-3 font-semibold text-foreground">{a.date}</td>
+                <td className="px-4 py-3 text-muted-foreground flex items-center gap-1.5">
+                  <HugeiconsIcon icon={BubbleChatFreeIcons} className="size-3.5 text-muted-foreground/70" />
+                  <span>{a.title}</span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <HugeiconsIcon icon={ArrowRight02FreeIcons} className="size-4 text-muted-foreground/60 inline" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// ── 서브뷰: 포트폴리오 조언 뷰어 ────────────────────────────────────────────
+function AdviceDetailView({ adviceKey }: { adviceKey: string }) {
+  // adviceKey = `${date}/${filename}`
+  const entry = useMemo(() => {
+    const [date, ...rest] = adviceKey.split('/')
+    const filename = rest.join('/')
+    return loadAdvices().find((a) => a.date === date && a.filename === filename)
+  }, [adviceKey])
+
+  useSetTitle(entry ? `포트폴리오 조언 · ${entry.date}` : '포트폴리오 조언')
+
+  const [content, setContent] = useState<ContentState>({ status: 'idle' })
+  const [retryTick, setRetryTick] = useState(0)
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [adviceKey])
+
+  useEffect(() => {
+    if (!entry) {
+      setContent({ status: 'error' })
+      return
+    }
+    let alive = true
+    setContent({ status: 'loading' })
+    entry
+      .load()
+      .then((raw) => {
+        if (alive) setContent({ status: 'ready', raw })
+      })
+      .catch(() => {
+        if (alive) setContent({ status: 'error' })
+      })
+    return () => {
+      alive = false
+    }
+  }, [entry, retryTick])
+
+  return (
+    <div className="min-w-0 flex-1 animate-in fade-in duration-300">
+      <div className="mb-6 flex items-center gap-2 border-b border-border pb-5">
+        <HugeiconsIcon icon={BubbleChatFreeIcons} className="size-4 text-muted-foreground" />
+        <h2 className="font-heading text-lg font-semibold text-foreground">
+          {entry ? `${entry.title} (${entry.date})` : '포트폴리오 조언'}
+        </h2>
+      </div>
+
+      {(content.status === 'idle' || content.status === 'loading') && <ContentSkeleton />}
+      {content.status === 'error' && (
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
+          <HugeiconsIcon icon={AlertCircleFreeIcons} className="size-6 text-muted-foreground" />
+          <p className="text-sm font-medium text-foreground">조언을 불러올 수 없습니다</p>
+          <Button variant="outline" size="sm" onClick={() => setRetryTick((t) => t + 1)} className="mt-1">
+            다시 시도
+          </Button>
+        </div>
+      )}
+      {content.status === 'ready' && (
+        <MarkdownView key={adviceKey} hideLeadingHeader>
+          {content.raw}
+        </MarkdownView>
+      )}
     </div>
   )
 }

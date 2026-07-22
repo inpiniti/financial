@@ -87,7 +87,7 @@ function scan(reportRoot: string): Record<string, ReportMetaEntry> {
         // 메타가 필요한 파일만 읽는다: 거장 본문 + 최종보고서.
         const base = file.replace(/\.md$/i, '')
         let entry: ReportMetaEntry | null = null
-        if (author === '_data') {
+        if (author === '_data' || author === '포트폴리오') {
           entry = null
         } else if (author === '최종') {
           if (base.endsWith('_최종보고서')) {

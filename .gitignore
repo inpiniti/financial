@@ -3,6 +3,10 @@ app/node_modules/
 app/.env.local
 app/.env
 
+# 한국투자증권 API 인증 (portfolio-advisor 스킬)
+.env
+.kis-token.json
+
 # App build output
 app/dist/
 
