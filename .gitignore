@@ -18,3 +18,6 @@ app/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# 표결 파이프라인 임시 데이터 (재생성 가능)
+.cache/

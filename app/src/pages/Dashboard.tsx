@@ -15,6 +15,7 @@ import {
   BubbleChatFreeIcons,
   Database01FreeIcons,
   Search01FreeIcons,
+  Calendar03FreeIcons,
 } from '@hugeicons/core-free-icons'
 
 import { loadCatalog } from '@/lib/catalog'
@@ -31,6 +32,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { MarkdownView } from '@/components/markdown-view'
 import { ScreenerDataTable } from '@/components/screener-data-table'
+import { VoteAnalysis } from '@/components/vote-analysis'
 import {
   Select,
   SelectContent,
@@ -186,6 +188,7 @@ export default function Dashboard() {
         <MainView
           activeTab={activeTab}
           uniqueTickers={uniqueTickers}
+          logoMap={logoMap}
           onChangeTab={(tab) => pushView({ tab })}
           onSelectGuru={(guru) => pushView({ view: 'guru-detail', guru })}
           onSelectTicker={(ticker) => pushView({ view: 'ticker-detail', ticker })}
@@ -246,6 +249,7 @@ interface TickerRow {
 function MainView({
   activeTab,
   uniqueTickers,
+  logoMap,
   onChangeTab,
   onSelectGuru,
   onSelectTicker,
@@ -253,6 +257,7 @@ function MainView({
 }: {
   activeTab: string
   uniqueTickers: TickerRow[]
+  logoMap: Map<string, string>
   onChangeTab: (tab: string) => void
   onSelectGuru: (guru: string) => void
   onSelectTicker: (ticker: string) => void
@@ -287,10 +292,14 @@ function MainView({
       </header>
 
       <Tabs value={activeTab} onValueChange={onChangeTab} className="w-full">
-        <TabsList className="grid w-full max-w-[720px] grid-cols-4">
+        <TabsList className="grid w-full max-w-[880px] grid-cols-5">
           <TabsTrigger value="gurus" className="gap-1.5 py-1">
             <HugeiconsIcon icon={UserFreeIcons} className="size-3.5" />
             거장 리스트
+          </TabsTrigger>
+          <TabsTrigger value="votes" className="gap-1.5 py-1">
+            <HugeiconsIcon icon={Calendar03FreeIcons} className="size-3.5" />
+            간단 분석
           </TabsTrigger>
           <TabsTrigger value="tickers" className="gap-1.5 py-1">
             <HugeiconsIcon icon={LayersFreeIcons} className="size-3.5" />
@@ -363,6 +372,11 @@ function MainView({
               </table>
             </div>
           </div>
+        </TabsContent>
+
+        {/* 간단 분석 탭 — Supabase guru_votes에 쌓인 날짜별 13인 표결 */}
+        <TabsContent value="votes" className="mt-4">
+          <VoteAnalysis logoMap={logoMap} />
         </TabsContent>
 
         {/* 종목 리스트 탭 */}
