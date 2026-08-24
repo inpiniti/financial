@@ -221,7 +221,18 @@ if (process.argv[1]?.endsWith('guru-core.mjs')) {
   const failed = []
   for (const t of tickers) {
     try {
-      const md = await buildCore(t)
+      // 6자리 숫자 코드는 국내 종목 — 거래소 구분이 없으므로 코스피(.KS) → 코스닥(.KQ) 순으로 시도.
+      // 파일명·DB 티커는 접미사 없는 원 코드를 유지한다.
+      let md
+      if (/^\d{6}$/.test(t)) {
+        try {
+          md = await buildCore(`${t}.KS`)
+        } catch {
+          md = await buildCore(`${t}.KQ`)
+        }
+      } else {
+        md = await buildCore(t)
+      }
       if (outDir) {
         const out = path.join(outDir, `${t}.md`)
         fs.mkdirSync(outDir, { recursive: true })

@@ -7,6 +7,7 @@
 //   node scripts/guru-db.mjs seed [YYYY-MM-DD]         # 스크리너 유니버스를 행으로 생성
 //   node scripts/guru-db.mjs put <날짜> <티커> < votes.txt
 //   node scripts/guru-db.mjs show <날짜>                # 저장된 표를 콘솔에 출력
+//   node scripts/guru-db.mjs rank <날짜>                # 완료 보고용 요약(분포·순위·거장별 성향)
 //   node scripts/guru-db.mjs todo <날짜>                # 아직 판정 안 된 티커만 출력
 //
 // put의 입력은 guru-vote 에이전트가 뱉은 한 줄들을 그대로 이어붙인 텍스트다:
@@ -15,7 +16,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { buildUniverse } from './guru-universe.mjs'
+import { buildUniverse, parseSteps } from './guru-universe.mjs'
 
 // ── 설정 ────────────────────────────────────────────────────────────────
 // 키는 절대 코드에 박지 않는다. 저장소 루트 .env(=gitignore 대상)에서 읽는다.
@@ -150,8 +151,9 @@ async function put(d, ticker, text) {
   )
 }
 
-async function show(d) {
-  const rows = await rest(`${TABLE}?d=eq.${d}&select=*&order=g0.asc,ticker.asc`)
+async function show(d, nation) {
+  const nf = nation ? `&nation=eq.${nation}` : ''
+  const rows = await rest(`${TABLE}?d=eq.${d}${nf}&select=*&order=g0.asc,ticker.asc`)
   if (!rows.length) return console.log(`${d}: 행 없음`)
   const cols = GURU_COLUMNS.map((g) => g.col)
   console.log(['티커'.padEnd(6), '종합', ...cols.map((c) => c.padStart(3))].join(' '))
@@ -168,8 +170,48 @@ async function show(d) {
   console.log(`\n${done}/${rows.length} 완료`)
 }
 
-async function todo(d) {
-  const rows = await rest(`${TABLE}?d=eq.${d}&g0=is.null&select=ticker&order=ticker.asc`)
+/** 완료 보고용 요약: 종합 분포 + 우호/부정 순위 + 거장별 성향. */
+async function rank(d, top = 10, nation) {
+  const nf = nation ? `&nation=eq.${nation}` : ''
+  const rows = await rest(`${TABLE}?d=eq.${d}${nf}&select=*`)
+  if (!rows.length) return console.log(`${d}: 행 없음`)
+  const cols = GURU_COLUMNS.map((g) => g.col)
+
+  const dist = [0, 0, 0, 0]
+  for (const r of rows) if (r.g0 !== null) dist[r.g0] += 1
+  console.log(
+    `종합 분포: 매수${dist[0]} 보유${dist[1]} 관망${dist[2]} 매도${dist[3]} (판정 ${dist.reduce((a, b) => a + b, 0)}/${rows.length})`,
+  )
+
+  // 우호도 점수: 매수 +2, 보유 +1, 매도 -2. 관망은 0(판단 유보이지 부정이 아니다).
+  const scored = rows
+    .map((r) => {
+      const c = [0, 0, 0, 0]
+      for (const k of cols) if (r[k] !== null) c[r[k]] += 1
+      return { t: r.ticker, n: r.name ?? '', c, s: c[0] * 2 + c[1] - c[3] * 2 }
+    })
+    .sort((a, b) => b.s - a.s)
+
+  const line = (r) =>
+    `${r.t.padEnd(6)} 매수${r.c[0]} 보유${r.c[1]} 관망${r.c[2]} 매도${r.c[3]}   ${r.n}`
+  console.log(`\n=== 우호 상위 ${top} ===`)
+  scored.slice(0, top).forEach((r) => console.log(line(r)))
+  console.log(`\n=== 부정 상위 ${top} ===`)
+  scored.slice(-top).reverse().forEach((r) => console.log(line(r)))
+
+  console.log('\n=== 거장별 성향 ===')
+  GURU_COLUMNS.forEach((g) => {
+    const c = [0, 0, 0, 0]
+    for (const r of rows) if (r[g.col] !== null) c[r[g.col]] += 1
+    console.log(
+      `${g.key.padEnd(7)} 매수${String(c[0]).padStart(3)} 보유${String(c[1]).padStart(3)} 관망${String(c[2]).padStart(3)} 매도${String(c[3]).padStart(3)}`,
+    )
+  })
+}
+
+async function todo(d, nation) {
+  const nf = nation ? `&nation=eq.${nation}` : ''
+  const rows = await rest(`${TABLE}?d=eq.${d}${nf}&g0=is.null&select=ticker&order=ticker.asc`)
   console.log(rows.map((r) => r.ticker).join(' '))
 }
 
@@ -186,15 +228,20 @@ if (process.argv[1]?.endsWith('guru-db.mjs')) try {
   if (cmd === 'seed') {
     const d = rest_[0] && /^\d{4}-\d{2}-\d{2}$/.test(rest_[0]) ? rest_[0] : today()
     const nIdx = rest_.indexOf('--nation')
-    await seed(d, nIdx >= 0 ? rest_[nIdx + 1] : 'us', { 피셔: 5 })
+    const sIdx = rest_.indexOf('--step')
+    // 기본은 해외 관례(피셔만 5단계). --step '전체=5' 처럼 넘기면 전 스크리너에 적용된다.
+    const steps = sIdx >= 0 && rest_[sIdx + 1] ? parseSteps(rest_[sIdx + 1]) : { 피셔: 5 }
+    await seed(d, nIdx >= 0 ? rest_[nIdx + 1] : 'us', steps)
   } else if (cmd === 'put') {
     await put(rest_[0], rest_[1], readStdin())
   } else if (cmd === 'show') {
-    await show(rest_[0] ?? today())
+    await show(rest_[0] && !rest_[0].startsWith('--') ? rest_[0] : today(), rest_.includes('--nation') ? rest_[rest_.indexOf('--nation') + 1] : undefined)
+  } else if (cmd === 'rank') {
+    await rank(rest_[0] && !rest_[0].startsWith('--') ? rest_[0] : today(), 10, rest_.includes('--nation') ? rest_[rest_.indexOf('--nation') + 1] : undefined)
   } else if (cmd === 'todo') {
-    await todo(rest_[0] ?? today())
+    await todo(rest_[0] && !rest_[0].startsWith('--') ? rest_[0] : today(), rest_.includes('--nation') ? rest_[rest_.indexOf('--nation') + 1] : undefined)
   } else {
-    console.error('명령: seed | put | show | todo  (자세한 건 파일 상단 주석)')
+    console.error('명령: seed | put | show | rank | todo  (자세한 건 파일 상단 주석)')
     process.exit(1)
   }
 } catch (e) {
