@@ -124,3 +124,11 @@ export async function fetchVotesByDate(date: string): Promise<VoteRow[]> {
   )
   return rows.map(toRow)
 }
+
+/** 한 종목의 표결 이력 전체(날짜 오름차순). 펼친 행의 일자별 히트맵이 쓴다. */
+export async function fetchVotesByTicker(ticker: string): Promise<VoteRow[]> {
+  const rows = await rest<RawRow[]>(
+    `ticker=eq.${encodeURIComponent(ticker)}&select=*&order=d.asc`,
+  )
+  return rows.map(toRow)
+}

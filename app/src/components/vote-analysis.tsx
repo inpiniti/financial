@@ -6,6 +6,10 @@
 //
 // 날짜 선택은 shadcn date picker(Popover + Calendar) 조합이며, 표결이 없는 날은
 // 아예 못 고르게 막는다(빈 화면을 보여주느니 선택지에서 지우는 편이 덜 헷갈린다).
+//
+// 행을 펼치면 그 종목의 표결 이력 전체를 티커로 다시 조회해 거장×날짜 히트맵으로 보여준다
+// (vote-history.tsx). 고른 날짜 열이 강조되므로 "그날 누가 뭐라 했나"와 "그 판정이 언제
+// 바뀌었나"를 한 그림에서 읽을 수 있다.
 
 import { useEffect, useMemo, useState } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -23,8 +27,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { VerdictBadge } from '@/components/verdict-badge'
 import { TallyBar } from '@/components/tally-bar'
+import { VoteHistory } from '@/components/vote-history'
 import { cn } from '@/lib/utils'
-import { fetchVoteDates, fetchVotesByDate, isVotesConfigured } from '@/lib/votes'
+import { fetchVoteDates, fetchVotesByDate, fetchVotesByTicker, isVotesConfigured } from '@/lib/votes'
 import type { VoteRow } from '@/lib/votes'
 
 /** Date → 'YYYY-MM-DD'. toISOString은 UTC로 밀려 하루 어긋날 수 있어 로컬 기준으로 만든다. */
@@ -199,6 +204,7 @@ export function VoteAnalysis({ logoMap }: VoteAnalysisProps) {
         ) : (
           <VoteTable
             rows={rowsState.rows}
+            selectedDate={selectedDate}
             logoMap={logoMap}
             expanded={expanded}
             onToggle={(ticker) => setExpanded((prev) => (prev === ticker ? null : ticker))}
@@ -210,11 +216,13 @@ export function VoteAnalysis({ logoMap }: VoteAnalysisProps) {
 
 function VoteTable({
   rows,
+  selectedDate,
   logoMap,
   expanded,
   onToggle,
 }: {
   rows: VoteRow[]
+  selectedDate: string
   logoMap?: Map<string, string>
   expanded: string | null
   onToggle: (ticker: string) => void
@@ -239,7 +247,14 @@ function VoteTable({
               const logoid = logoMap?.get(r.ticker)
               const isOpen = expanded === r.ticker
               return (
-                <VoteTableRow key={r.ticker} row={r} logoid={logoid} isOpen={isOpen} onToggle={onToggle} />
+                <VoteTableRow
+                  key={r.ticker}
+                  row={r}
+                  selectedDate={selectedDate}
+                  logoid={logoid}
+                  isOpen={isOpen}
+                  onToggle={onToggle}
+                />
               )
             })}
           </tbody>
@@ -251,11 +266,13 @@ function VoteTable({
 
 function VoteTableRow({
   row,
+  selectedDate,
   logoid,
   isOpen,
   onToggle,
 }: {
   row: VoteRow
+  selectedDate: string
   logoid?: string
   isOpen: boolean
   onToggle: (ticker: string) => void
@@ -322,25 +339,51 @@ function VoteTableRow({
       {isOpen && (
         <tr className="bg-muted/20">
           <td colSpan={7} className="px-4 py-3">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-              {row.votes.map((v) => (
-                <div
-                  key={v.screenerKey}
-                  className="flex items-center justify-between gap-2 rounded-md border border-border bg-card px-2.5 py-1.5"
-                >
-                  <span className="truncate text-[0.6875rem] text-muted-foreground">{v.name}</span>
-                  {v.verdict ? (
-                    <VerdictBadge verdict={v.verdict} className="text-[0.625rem]" />
-                  ) : (
-                    <span className="text-[0.625rem] text-muted-foreground/50">—</span>
-                  )}
-                </div>
-              ))}
-            </div>
+            <HistoryPanel row={row} selectedDate={selectedDate} />
           </td>
         </tr>
       )}
     </>
+  )
+}
+
+type HistoryState =
+  | { status: 'loading' }
+  | { status: 'ready'; rows: VoteRow[] }
+  | { status: 'error'; message: string }
+
+/** 펼친 행의 본문 — 티커별 이력을 불러와 히트맵으로. 이력 조회가 실패해도 현재 날짜 한 열은 그린다. */
+function HistoryPanel({ row, selectedDate }: { row: VoteRow; selectedDate: string }) {
+  const [state, setState] = useState<HistoryState>({ status: 'loading' })
+
+  useEffect(() => {
+    let alive = true
+    setState({ status: 'loading' })
+    fetchVotesByTicker(row.ticker)
+      .then((rows) => {
+        if (alive) setState({ status: 'ready', rows })
+      })
+      .catch((e: Error) => {
+        if (alive) setState({ status: 'error', message: e.message })
+      })
+    return () => {
+      alive = false
+    }
+  }, [row.ticker])
+
+  if (state.status === 'loading') return <Skeleton className="h-40 w-full" />
+
+  const rows = state.status === 'ready' && state.rows.length > 0 ? state.rows : [row]
+
+  return (
+    <div className="flex flex-col gap-2">
+      {state.status === 'error' && (
+        <p className="text-[0.6875rem] text-muted-foreground">
+          이력을 불러오지 못해 선택한 날짜만 표시합니다. ({state.message})
+        </p>
+      )}
+      <VoteHistory rows={rows} selectedDate={selectedDate} />
+    </div>
   )
 }
 
