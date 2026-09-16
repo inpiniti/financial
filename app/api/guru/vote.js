@@ -1,3 +1,6 @@
+// Configuration for Vercel Serverless Function (increase timeout to 60 seconds)
+export const config = { maxDuration: 60 };
+
 /**
  * Vercel Serverless Function: /api/guru/vote
  * vite-guru-plugin.ts와 동기화된 최적화 버전
