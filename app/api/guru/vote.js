@@ -26,7 +26,9 @@ const GURU_COLUMNS = [
 
 const SCORE = { 매수: 0, 보유: 1, 관망: 2, 매도: 3 }
 const SCORE_LABEL = ['매수', '보유', '관망', '매도']
-const VOTE_LINE = /인물:\s*([^|]+?)\s*\|\s*의견:\s*(매수|보유|관망|매도)/g
+// 실제 모델 출력 형식: "이름: 의견 | 확신도: N | ..."
+// 기존 형식도 혹시 대비: "인물: 이름 | 의견: 의견"
+const VOTE_LINE = /^([^\n:|]+(?:\s[^\n:|]+)*):\s*(매수|보유|관망|매도)/gm
 
 function parseVotes(text) {
   const scores = {}
