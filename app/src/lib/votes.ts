@@ -184,3 +184,20 @@ export async function fetchCompletedTickers(date = getTodayString()): Promise<Se
     return new Set()
   }
 }
+
+/** 오늘(또는 지정 날짜) 티커별 g0 점수 맵 반환 (정렬용) */
+export async function fetchTodayVoteG0(date = getTodayString()): Promise<Record<string, number>> {
+  try {
+    const rows = await rest<{ ticker: string; g0: number | null }[]>(
+      `d=eq.${encodeURIComponent(date)}&g0=not.is.null&select=ticker,g0`,
+    )
+    const result: Record<string, number> = {}
+    for (const r of rows) {
+      if (typeof r.g0 === 'number') result[r.ticker] = r.g0
+    }
+    return result
+  } catch (e) {
+    console.warn('[Votes] Failed to fetch vote g0 scores:', e)
+    return {}
+  }
+}

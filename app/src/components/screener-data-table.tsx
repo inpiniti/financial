@@ -26,7 +26,7 @@ import {
   metricColumns,
 } from '@/lib/screener'
 import type { GuruPicks, Nation, Stock } from '@/lib/screener'
-import { fetchCompletedTickers, getTodayString, upsertVoteResult } from '@/lib/votes'
+import { fetchCompletedTickers, fetchTodayVoteG0, getTodayString, upsertVoteResult } from '@/lib/votes'
 import {
   Table,
   TableBody,
@@ -581,21 +581,17 @@ export function ScreenerDataTable({
   const [reloadKey, setReloadKey] = useState(0)
   const [sliderValue, setSliderValue] = useState<number>(0)
   const [completedTickers, setCompletedTickers] = useState<Set<string>>(new Set())
-  const [analysisStatus, setAnalysisStatus] = useState<
-    Record<string, 'idle' | 'collecting' | 'voting' | 'done' | 'error'>
-  >({})
+  const [analysisStatus, setAnalysisStatus] = useState<Record<string, string>>({})
+  const [voteG0, setVoteG0] = useState<Record<string, number>>({})
   const [isBulkAnalyzing, setIsBulkAnalyzing] = useState(false)
   const bulkStopRef = useRef(false)
 
-  // 화면 접속 때 분석된 종목인지 확인해서 완료 표시 (오늘 날짜 기준)
+  // 화면 접속 때 분석된 종목인지 확인해서 완료 표시 + g0 점수 로드 (오늘 날짜 기준)
   useEffect(() => {
     let alive = true
-    fetchCompletedTickers().then((set) => {
-      if (alive) setCompletedTickers(set)
-    })
-    return () => {
-      alive = false
-    }
+    fetchCompletedTickers().then((set) => { if (alive) setCompletedTickers(set) })
+    fetchTodayVoteG0().then((scores) => { if (alive) setVoteG0(scores) })
+    return () => { alive = false }
   }, [])
 
   // 간단분석 실행 핸들러
@@ -674,7 +670,10 @@ export function ScreenerDataTable({
         }
       }
 
-      // 4단계: 완료 및 비활성화 (실수로라도 재분석 불가)
+      // 4단계: 완료 및 비활성화 + g0 점수 로컬 업데이트
+      if (typeof voteData.g0 === 'number') {
+        setVoteG0((prev) => ({ ...prev, [ticker]: voteData.g0 }))
+      }
       setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'done' }))
       setCompletedTickers((prev) => new Set(prev).add(ticker))
     } catch (e: any) {
@@ -824,6 +823,7 @@ export function ScreenerDataTable({
           onSelectTicker={onSelectTicker}
           completedTickers={completedTickers}
           analysisStatus={analysisStatus}
+          voteG0={voteG0}
           onQuickAnalysis={handleQuickAnalysis}
           nation={nation}
         />
@@ -877,13 +877,15 @@ function ResultTable({
   onSelectTicker,
   completedTickers,
   analysisStatus,
+  voteG0,
   onQuickAnalysis,
   nation,
 }: {
   picks: GuruPicks
   onSelectTicker?: (ticker: string) => void
   completedTickers: Set<string>
-  analysisStatus: Record<string, 'idle' | 'collecting' | 'voting' | 'done' | 'error'>
+  analysisStatus: Record<string, string>
+  voteG0: Record<string, number>
   onQuickAnalysis: (ticker: string, stockName: string, nation: Nation) => void
   nation: Nation
 }) {
@@ -940,8 +942,18 @@ function ResultTable({
 
     const actionColumn: ColumnDef<Row> = {
       id: 'quickAnalysis',
+      accessorFn: (row) => voteG0[row.ticker] ?? null,
       header: () => <span className="block text-center font-semibold">간단분석</span>,
-      enableSorting: false,
+      enableSorting: true,
+      sortUndefined: 'last',
+      sortingFn: (a, b) => {
+        const av = voteG0[a.original.ticker] ?? null
+        const bv = voteG0[b.original.ticker] ?? null
+        if (av === null && bv === null) return 0
+        if (av === null) return 1
+        if (bv === null) return -1
+        return av - bv // 매수(0) → 보유(1) → 관망(2) → 매도(3)
+      },
       cell: ({ row }) => {
         const ticker = row.original.ticker
         const isDone = completedTickers.has(ticker) || analysisStatus[ticker] === 'done'
