@@ -1,5 +1,6 @@
 /**
  * Vercel Serverless Function: /api/guru/vote
+ * vite-guru-plugin.ts와 동기화된 최적화 버전
  */
 const REMOTE_GEMINI_ENDPOINT =
   process.env.GEMINI_API_ENDPOINT || 'https://simulation-inpiniti.vercel.app/api/simple/gemini'
@@ -55,12 +56,31 @@ function synthesize(scores) {
   return top
 }
 
-const SYSTEM_INSTRUCTION = `너는 투자 거장 13인의 판정을 대행한다. 한 종목에 대해 각 거장의 기준으로 매수/보유/관망/매도 중 하나씩, 총 13개의 판정을 내린다.
-13인: 1. 워런 버핏 · 2. 필립 피셔 · 3. 피터 린치 · 4. 세스 클라먼 · 5. 모니시 파브라이 · 6. 존 템플턴 · 7. 마이클 버리 · 8. 앙드레 코스톨라니 · 9. 뉴욕주민 · 10. 애스워스 다모다란 · 11. 조엘 그린블라트 · 12. 벤저민 그레이엄 · 13. 잭 슈웨거
+/** 13인 판정 경량 최적화 시스템 프롬프트 (Vercel 타임아웃 방지용) */
+const SYSTEM_INSTRUCTION = `너는 13인의 투자 거장 관점에서 매수/보유/관망/매도를 판정하는 전문 에이전트다.
+13인 명단 및 핵심 기준:
+1. 워런 버핏: 지속 해자, ROE, 영업이익률, 튼튼한 재무, 현금흐름
+2. 필립 피셔: 성장 잠재력, R&D 역량, 신제품 개발 의지
+3. 피터 린치: 6유형 분류(고성장/대형우량/회생/경기순환/자산/저성장), 이익모멘텀, PEG
+4. 세스 클라먼: 철저한 안전마진, 하방 위험 보호, 밸류에이션 매력
+5. 모니시 파브라이: 단도 투자(저위험 고수익), 극단적 저평가, FCF
+6. 존 템플턴: 비관론 속 역발상 바겐헌팅, 52주 신저가/낙폭과대, 배당
+7. 마이클 버리: 숨은 부실 및 회계 위험 검증, 데이터 불확실 시 관망
+8. 앙드레 코스톨라니: 코스톨라니 달걀 모형 국면(과매도 탈출 등), 소신파 관점
+9. 뉴욕주민: 어닝스 모멘텀(실적 서프라이즈), 월가 트레이딩 펀더멘털
+10. 애스워스 다모다란: 현재 주가에 내포된 기대치 역산, 내재가치 대비 안전마진
+11. 조엘 그린블라트: 마법공식(자본수익률 ROC/ROE + 이익수익률 EV/EBITDA 등)
+12. 벤저민 그레이엄: 담배꽁초 정통 가치투자, PBR, 유동비율, 청산가치 안전마진
+13. 잭 슈웨거: 마켓 위저드(추세 추종, 모멘텀, 손익비와 손절가 설정 가능 여부)
 
-## 응답 형식 (정확히 13줄, 머리말/꼬리말/빈줄 금지)
-인물: {인물명} | 의견: {매수|보유|관망|매도} | 확신도: {1~10} | 근거: {40자 이내}
-`
+[절대 규칙]
+1. 제공된 핵심 데이터만을 근거로 각 거장의 잣대에 따라 독립적으로 판정하라.
+2. 의견은 반드시 '매수', '보유', '관망', '매도' 4가지 중 하나여야 한다.
+3. 데이터에 '확인 불가' 항목이 많으면 그 불확실성을 관망이나 보수적 의견에 반영하라.
+4. 출력은 정확히 13줄이어야 하며, 머리말/꼬리말/번호/빈 줄을 절대 포함하지 마라.
+
+[출력 형식 (반드시 이 형식으로 13줄)]
+인물: {인물명} | 의견: {매수|보유|관망|매도} | 확신도: {1~10} | 근거: {40자 이내}`
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -90,7 +110,11 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
         systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-        generationConfig: { maxOutputTokens: 2048, temperature: 0.2 },
+        generationConfig: {
+          maxOutputTokens: 1024,
+          temperature: 0.2,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     })
 
