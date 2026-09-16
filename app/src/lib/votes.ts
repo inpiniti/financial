@@ -132,3 +132,23 @@ export async function fetchVotesByTicker(ticker: string): Promise<VoteRow[]> {
   )
   return rows.map(toRow)
 }
+
+/** 로컬 기준 'YYYY-MM-DD' 날짜 문자열 */
+export function getTodayString(): string {
+  const now = new Date()
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`
+}
+
+/** 오늘(또는 지정 날짜) 이미 판정(g0 !== null)이 완료된 티커 Set을 반환 */
+export async function fetchCompletedTickers(date = getTodayString()): Promise<Set<string>> {
+  try {
+    const rows = await rest<{ ticker: string; g0: number | null }[]>(
+      `d=eq.${encodeURIComponent(date)}&g0=not.is.null&select=ticker,g0`,
+    )
+    return new Set(rows.map((r) => r.ticker))
+  } catch (e) {
+    console.warn('[Votes] Failed to fetch completed tickers:', e)
+    return new Set()
+  }
+}

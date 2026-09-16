@@ -3,10 +3,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { reportMetaPlugin } from './vite-report-meta.ts'
+import { guruPlugin } from './vite-guru-plugin.ts'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), reportMetaPlugin()],
+  plugins: [react(), tailwindcss(), reportMetaPlugin(), guruPlugin()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

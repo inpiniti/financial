@@ -1,0 +1,225 @@
+import type { Plugin } from 'vite'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import dotenv from 'dotenv'
+
+// 루트 .env 및 app/.env 로드
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const rootDir = path.resolve(__dirname, '..')
+
+dotenv.config({ path: path.join(rootDir, '.env') })
+dotenv.config({ path: path.join(__dirname, '.env') })
+
+// guru-core 및 guru-db 모듈 동적 임포트용 경로
+const GURU_CORE_PATH = path.join(rootDir, 'scripts', 'guru-core.mjs')
+const GURU_DB_PATH = path.join(rootDir, 'scripts', 'guru-db.mjs')
+const GURU_VOTE_AGENT_PATH = path.join(rootDir, '.claude', 'agents', 'guru-vote-all.md')
+
+/** 13인 판정 시스템 프롬프트 캐시 */
+let systemPromptCache: string | null = null
+function getSystemPrompt(): string {
+  if (systemPromptCache) return systemPromptCache
+  try {
+    const raw = fs.readFileSync(GURU_VOTE_AGENT_PATH, 'utf8')
+    // frontmatter 제거
+    systemPromptCache = raw.replace(/^---[\s\S]*?---\s*/, '')
+  } catch (e) {
+    console.error('[GuruPlugin] Failed to read guru-vote-all.md:', e)
+    systemPromptCache = '너는 13인의 투자 거장 관점에서 매수/보유/관망/매도를 판정한다.'
+  }
+  return systemPromptCache
+}
+
+const REMOTE_GEMINI_ENDPOINT =
+  process.env.GEMINI_API_ENDPOINT || 'https://simulation-inpiniti.vercel.app/api/simple/gemini'
+
+async function callGemini(contents: any[], systemInstruction?: string): Promise<string> {
+  const res = await fetch(REMOTE_GEMINI_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents,
+      systemInstruction: systemInstruction ? { parts: [{ text: systemInstruction }] } : undefined,
+      generationConfig: {
+        maxOutputTokens: 2048,
+        temperature: 0.2,
+      },
+    }),
+  })
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '')
+    throw new Error(`원격 Gemini API 오류 (${res.status}): ${errText.slice(0, 300)}`)
+  }
+
+  const text = await res.text()
+  if (!text.trim()) {
+    throw new Error('원격 Gemini API에서 빈 응답을 받았습니다.')
+  }
+  return text
+}
+
+export function guruPlugin(): Plugin {
+  return {
+    name: 'vite-plugin-guru-api',
+    configureServer(server) {
+      // 1. 수집 API: GET /api/guru/collect?ticker=AMAT
+      server.middlewares.use('/api/guru/collect', async (req, res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
+        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 200
+          res.end()
+          return
+        }
+
+        try {
+          const urlObj = new URL(req.url || '', `http://${req.headers.host}`)
+          const ticker = urlObj.searchParams.get('ticker')?.trim()
+
+          if (!ticker) {
+            res.statusCode = 400
+            res.end(JSON.stringify({ error: 'ticker 파라미터가 필요합니다.' }))
+            return
+          }
+
+          const { buildCore } = await import(GURU_CORE_PATH)
+          let coreData: string
+
+          // 6자리 숫자 코드는 국내 종목
+          if (/^\d{6}$/.test(ticker)) {
+            try {
+              coreData = await buildCore(`${ticker}.KS`)
+            } catch {
+              coreData = await buildCore(`${ticker}.KQ`)
+            }
+          } else {
+            coreData = await buildCore(ticker)
+          }
+
+          res.statusCode = 200
+          res.end(JSON.stringify({ success: true, ticker, coreData }))
+        } catch (e: any) {
+          res.statusCode = 500
+          res.end(JSON.stringify({ success: false, error: e.message }))
+        }
+      })
+
+      // 2. 판정 및 DB 저장 API: POST /api/guru/vote
+      server.middlewares.use('/api/guru/vote', async (req, res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS')
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+        res.setHeader('Content-Type', 'application/json; charset=utf-8')
+
+        if (req.method === 'OPTIONS') {
+          res.statusCode = 200
+          res.end()
+          return
+        }
+
+        if (req.method !== 'POST') {
+          res.statusCode = 405
+          res.end(JSON.stringify({ error: 'POST 요청만 지원합니다.' }))
+          return
+        }
+
+        try {
+          const chunks: Buffer[] = []
+          for await (const chunk of req) {
+            chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+          }
+          const bodyStr = Buffer.concat(chunks).toString('utf8')
+          const body = JSON.parse(bodyStr)
+
+          const { ticker, date = new Date().toISOString().slice(0, 10), coreData, nation = 'us', name = '' } = body
+
+          if (!ticker || !coreData) {
+            res.statusCode = 400
+            res.end(JSON.stringify({ error: 'ticker 및 coreData가 필요합니다.' }))
+            return
+          }
+
+          // 1) Gemini 판정 호출
+          const systemPrompt = getSystemPrompt()
+          const userPrompt = `티커: ${ticker}\n날짜: ${date}\n핵심 데이터:\n${coreData}`
+
+          const promptContents = [{ role: 'user', parts: [{ text: userPrompt }] }]
+          const verdictText = await callGemini(promptContents, systemPrompt)
+
+          // 2) 표결 파싱 및 종합 계산
+          const { parseVotes, synthesize, SCORE_LABEL } = await import(GURU_DB_PATH)
+          const { scores, unknown } = parseVotes(verdictText)
+          const g0 = synthesize(scores)
+          const overall = typeof g0 === 'number' ? (SCORE_LABEL?.[g0] ?? null) : null
+
+          const tally = { 매수: 0, 보유: 0, 관망: 0, 매도: 0 }
+          for (const v of Object.values(scores)) {
+            if (v === 0) tally.매수++
+            else if (v === 1) tally.보유++
+            else if (v === 2) tally.관망++
+            else if (v === 3) tally.매도++
+          }
+
+          // 3) Supabase DB 저장
+          const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+          const supabaseKey =
+            process.env.SUPABASE_SERVICE_KEY ||
+            process.env.SUPABASE_ANON_KEY ||
+            process.env.VITE_SUPABASE_ANON_KEY
+
+          if (supabaseUrl && supabaseKey) {
+            const patch = {
+              d: date,
+              ticker,
+              name: name || ticker,
+              nation,
+              ...scores,
+              g0,
+              updated_at: new Date().toISOString(),
+            }
+
+            const dbRes = await fetch(`${supabaseUrl}/rest/v1/guru_votes?on_conflict=d,ticker`, {
+              method: 'POST',
+              headers: {
+                apikey: supabaseKey,
+                Authorization: `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+                Prefer: 'resolution=merge-duplicates,return=minimal',
+              },
+              body: JSON.stringify([patch]),
+            })
+
+            if (!dbRes.ok) {
+              const errBody = await dbRes.text().catch(() => '')
+              console.warn('[GuruPlugin] Supabase save error:', dbRes.status, errBody)
+            }
+          }
+
+          res.statusCode = 200
+          res.end(
+            JSON.stringify({
+              success: true,
+              ticker,
+              date,
+              g0,
+              overall,
+              tally,
+              scores,
+              unknown,
+              verdictText,
+            })
+          )
+        } catch (e: any) {
+          console.error('[GuruPlugin] Vote error:', e)
+          res.statusCode = 500
+          res.end(JSON.stringify({ success: false, error: e.message }))
+        }
+      })
+    },
+  }
+}

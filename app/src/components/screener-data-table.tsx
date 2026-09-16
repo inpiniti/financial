@@ -26,6 +26,7 @@ import {
   metricColumns,
 } from '@/lib/screener'
 import type { GuruPicks, Nation, Stock } from '@/lib/screener'
+import { fetchCompletedTickers, getTodayString } from '@/lib/votes'
 import {
   Table,
   TableBody,
@@ -579,6 +580,71 @@ export function ScreenerDataTable({
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading')
   const [reloadKey, setReloadKey] = useState(0)
   const [sliderValue, setSliderValue] = useState<number>(0)
+  const [completedTickers, setCompletedTickers] = useState<Set<string>>(new Set())
+  const [analysisStatus, setAnalysisStatus] = useState<
+    Record<string, 'idle' | 'collecting' | 'voting' | 'done' | 'error'>
+  >({})
+
+  // 화면 접속 때 분석된 종목인지 확인해서 완료 표시 (오늘 날짜 기준)
+  useEffect(() => {
+    let alive = true
+    fetchCompletedTickers().then((set) => {
+      if (alive) setCompletedTickers(set)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  // 간단분석 실행 핸들러
+  const handleQuickAnalysis = async (ticker: string, stockName: string, stockNation: Nation) => {
+    if (completedTickers.has(ticker)) return
+    const current = analysisStatus[ticker]
+    if (current === 'collecting' || current === 'voting' || current === 'done') return
+
+    try {
+      // 1단계: spiner 데이터 수집중...
+      setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'collecting' }))
+      const collectRes = await fetch(`/api/guru/collect?ticker=${encodeURIComponent(ticker)}`)
+      if (!collectRes.ok) {
+        throw new Error(`데이터 수집 실패 (${collectRes.status})`)
+      }
+      const collectData = await collectRes.json()
+      if (!collectData.success || !collectData.coreData) {
+        throw new Error(collectData.error || '데이터 수집 내용이 없습니다.')
+      }
+
+      // 2단계: spiner 13인 판정중...
+      setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'voting' }))
+      const voteRes = await fetch('/api/guru/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticker,
+          date: getTodayString(),
+          coreData: collectData.coreData,
+          nation: stockNation,
+          name: stockName,
+        }),
+      })
+
+      if (!voteRes.ok) {
+        throw new Error(`13인 판정 실패 (${voteRes.status})`)
+      }
+      const voteData = await voteRes.json()
+      if (!voteData.success) {
+        throw new Error(voteData.error || '13인 판정 처리에 실패했습니다.')
+      }
+
+      // 3단계: 완료 및 비활성화 (실수로라도 재분석 불가)
+      setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'done' }))
+      setCompletedTickers((prev) => new Set(prev).add(ticker))
+    } catch (e: any) {
+      console.error(`[QuickAnalysis] ${ticker} 실패:`, e)
+      alert(`${ticker} 간단분석 실패: ${e.message}`)
+      setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'error' }))
+    }
+  }
 
   // 거장이 바뀌면 슬라이더를 0단계로 초기화
   useEffect(() => {
@@ -669,7 +735,14 @@ export function ScreenerDataTable({
       {state === 'loading' && <ResultSkeleton />}
       {state === 'error' && <ErrorState onRetry={() => setReloadKey((k) => k + 1)} />}
       {state === 'ready' && filteredPicks && (
-        <ResultTable picks={filteredPicks} onSelectTicker={onSelectTicker} />
+        <ResultTable
+          picks={filteredPicks}
+          onSelectTicker={onSelectTicker}
+          completedTickers={completedTickers}
+          analysisStatus={analysisStatus}
+          onQuickAnalysis={handleQuickAnalysis}
+          nation={nation}
+        />
       )}
     </div>
   )
@@ -718,9 +791,17 @@ function NationToggle({ nation, onChange }: { nation: Nation; onChange: (n: Nati
 function ResultTable({
   picks,
   onSelectTicker,
+  completedTickers,
+  analysisStatus,
+  onQuickAnalysis,
+  nation,
 }: {
   picks: GuruPicks
   onSelectTicker?: (ticker: string) => void
+  completedTickers: Set<string>
+  analysisStatus: Record<string, 'idle' | 'collecting' | 'voting' | 'done' | 'error'>
+  onQuickAnalysis: (ticker: string, stockName: string, nation: Nation) => void
+  nation: Nation
 }) {
   const [sorting, setSorting] = useState<SortingState>([])
 
@@ -773,8 +854,78 @@ function ResultTable({
       ),
     }))
 
-    return [stockColumn, priceColumn, ...metricColumnDefs]
-  }, [metricKeys])
+    const actionColumn: ColumnDef<Row> = {
+      id: 'quickAnalysis',
+      header: () => <span className="block text-center font-semibold">간단분석</span>,
+      enableSorting: false,
+      cell: ({ row }) => {
+        const ticker = row.original.ticker
+        const isDone = completedTickers.has(ticker) || analysisStatus[ticker] === 'done'
+        const status = isDone ? 'done' : analysisStatus[ticker] || 'idle'
+
+        return (
+          <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+            {status === 'done' ? (
+              <Button
+                variant="ghost"
+                size="xs"
+                disabled
+                className="h-6 px-2 text-[0.6875rem] font-medium text-muted-foreground/80 cursor-not-allowed bg-muted/40"
+              >
+                완료
+              </Button>
+            ) : status === 'collecting' ? (
+              <Button
+                variant="secondary"
+                size="xs"
+                disabled
+                className="h-6 gap-1 px-2 text-[0.6875rem] font-medium animate-pulse"
+              >
+                <HugeiconsIcon icon={RefreshFreeIcons} className="size-3 animate-spin text-primary" />
+                데이터 수집중...
+              </Button>
+            ) : status === 'voting' ? (
+              <Button
+                variant="secondary"
+                size="xs"
+                disabled
+                className="h-6 gap-1 px-2 text-[0.6875rem] font-medium animate-pulse"
+              >
+                <HugeiconsIcon icon={RefreshFreeIcons} className="size-3 animate-spin text-primary" />
+                13인 판정중...
+              </Button>
+            ) : status === 'error' ? (
+              <Button
+                variant="destructive"
+                size="xs"
+                className="h-6 px-2 text-[0.6875rem]"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onQuickAnalysis(ticker, row.original.name, nation)
+                }}
+              >
+                재시도
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="xs"
+                className="h-6 px-2 text-[0.6875rem] font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onQuickAnalysis(ticker, row.original.name, nation)
+                }}
+              >
+                간단분석
+              </Button>
+            )}
+          </div>
+        )
+      },
+    }
+
+    return [stockColumn, priceColumn, ...metricColumnDefs, actionColumn]
+  }, [metricKeys, completedTickers, analysisStatus, onQuickAnalysis, nation])
 
   const table = useReactTable({
     data: rows,
