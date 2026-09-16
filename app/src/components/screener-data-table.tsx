@@ -654,17 +654,24 @@ export function ScreenerDataTable({
       }
 
       // 3단계: 클라이언트에서 직접 Supabase 저장 (API 서버 저장 실패 보완)
-      try {
-        await upsertVoteResult({
-          d: getTodayString(),
-          ticker,
-          name: stockName,
-          nation: stockNation,
-          scores: voteData.scores ?? {},
-          g0: voteData.g0 ?? null,
-        })
-      } catch (dbErr: any) {
-        console.warn(`[QuickAnalysis] ${ticker} DB 저장 실패:`, dbErr.message)
+      console.log(`[QuickAnalysis] ${ticker} verdictText:`, voteData.verdictText)
+      console.log(`[QuickAnalysis] ${ticker} scores:`, voteData.scores)
+      const hasScores = voteData.scores && Object.keys(voteData.scores).length > 0
+      if (!hasScores) {
+        console.warn(`[QuickAnalysis] ${ticker} scores가 비어있어 DB 저장을 건너뜁니다.`)
+      } else {
+        try {
+          await upsertVoteResult({
+            d: getTodayString(),
+            ticker,
+            name: stockName,
+            nation: stockNation,
+            scores: voteData.scores,
+            g0: voteData.g0 ?? null,
+          })
+        } catch (dbErr: any) {
+          console.warn(`[QuickAnalysis] ${ticker} DB 저장 실패:`, dbErr.message)
+        }
       }
 
       // 4단계: 완료 및 비활성화 (실수로라도 재분석 불가)
