@@ -2,7 +2,7 @@
 // @tanstack/react-table로 렌더한다. 거장 선택 탭은 이 컴포넌트의 관심사가 아니다
 // (그건 상위 페이지가 props로 screenerKey를 바꿔가며 담당한다).
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   type ColumnDef,
   type SortingState,
@@ -26,7 +26,7 @@ import {
   metricColumns,
 } from '@/lib/screener'
 import type { GuruPicks, Nation, Stock } from '@/lib/screener'
-import { fetchCompletedTickers, getTodayString } from '@/lib/votes'
+import { fetchCompletedTickers, getTodayString, upsertVoteResult } from '@/lib/votes'
 import {
   Table,
   TableBody,
@@ -584,6 +584,8 @@ export function ScreenerDataTable({
   const [analysisStatus, setAnalysisStatus] = useState<
     Record<string, 'idle' | 'collecting' | 'voting' | 'done' | 'error'>
   >({})
+  const [isBulkAnalyzing, setIsBulkAnalyzing] = useState(false)
+  const bulkStopRef = useRef(false)
 
   // 화면 접속 때 분석된 종목인지 확인해서 완료 표시 (오늘 날짜 기준)
   useEffect(() => {
@@ -651,7 +653,21 @@ export function ScreenerDataTable({
         throw new Error(voteData.error || '13인 판정 처리에 실패했습니다.')
       }
 
-      // 3단계: 완료 및 비활성화 (실수로라도 재분석 불가)
+      // 3단계: 클라이언트에서 직접 Supabase 저장 (API 서버 저장 실패 보완)
+      try {
+        await upsertVoteResult({
+          d: getTodayString(),
+          ticker,
+          name: stockName,
+          nation: stockNation,
+          scores: voteData.scores ?? {},
+          g0: voteData.g0 ?? null,
+        })
+      } catch (dbErr: any) {
+        console.warn(`[QuickAnalysis] ${ticker} DB 저장 실패:`, dbErr.message)
+      }
+
+      // 4단계: 완료 및 비활성화 (실수로라도 재분석 불가)
       setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'done' }))
       setCompletedTickers((prev) => new Set(prev).add(ticker))
     } catch (e: any) {
@@ -660,6 +676,28 @@ export function ScreenerDataTable({
       setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'error' }))
     }
   }
+
+  // 전체 간단분석: 미완료 종목을 순차적으로 분석
+  const handleBulkAnalysis = useCallback(async () => {
+    if (isBulkAnalyzing) {
+      bulkStopRef.current = true
+      setIsBulkAnalyzing(false)
+      return
+    }
+    if (!filteredPicks) return
+    const pending = filteredPicks.stocks.filter(
+      (s) => !completedTickers.has(s.ticker) && analysisStatus[s.ticker] !== 'done',
+    )
+    if (pending.length === 0) return
+
+    bulkStopRef.current = false
+    setIsBulkAnalyzing(true)
+    for (const stock of pending) {
+      if (bulkStopRef.current) break
+      await handleQuickAnalysis(stock.ticker, stock.name ?? stock.ticker, nation)
+    }
+    setIsBulkAnalyzing(false)
+  }, [isBulkAnalyzing, filteredPicks, completedTickers, analysisStatus, handleQuickAnalysis, nation])
 
   // 거장이 바뀌면 슬라이더를 0단계로 초기화
   useEffect(() => {
@@ -744,7 +782,31 @@ export function ScreenerDataTable({
           filteredCount={filteredStocks.length}
           hasData={state === 'ready' && !!picks}
         />
-        <NationToggle nation={nation} onChange={setNation} />
+        <div className="flex items-center gap-2">
+          {state === 'ready' && filteredPicks && (() => {
+            const pendingCount = filteredPicks.stocks.filter(
+              (s) => !completedTickers.has(s.ticker) && analysisStatus[s.ticker] !== 'done',
+            ).length
+            return pendingCount > 0 ? (
+              <Button
+                variant={isBulkAnalyzing ? 'destructive' : 'outline'}
+                size="xs"
+                className="h-7 gap-1.5 px-2.5 text-[0.6875rem] font-medium"
+                onClick={handleBulkAnalysis}
+              >
+                {isBulkAnalyzing ? (
+                  <>
+                    <HugeiconsIcon icon={RefreshFreeIcons} className="size-3 animate-spin" />
+                    중지
+                  </>
+                ) : (
+                  `전체 간단분석 (${pendingCount})`
+                )}
+              </Button>
+            ) : null
+          })()}
+          <NationToggle nation={nation} onChange={setNation} />
+        </div>
       </div>
 
       {state === 'loading' && <ResultSkeleton />}

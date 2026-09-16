@@ -140,6 +140,38 @@ export function getTodayString(): string {
   return `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}`
 }
 
+/** 판정 결과를 클라이언트에서 직접 Supabase에 upsert (API 서버 저장 실패 보완용) */
+export async function upsertVoteResult(data: {
+  d: string
+  ticker: string
+  name: string
+  nation: string
+  scores: Record<string, number>
+  g0: number | null
+}): Promise<void> {
+  if (!URL || !KEY) throw new Error('VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 가 설정되지 않았습니다.')
+  const patch = {
+    d: data.d,
+    ticker: data.ticker,
+    name: data.name,
+    nation: data.nation,
+    ...data.scores,
+    g0: data.g0,
+    updated_at: new Date().toISOString(),
+  }
+  const res = await fetch(`${URL}/rest/v1/guru_votes?on_conflict=d,ticker`, {
+    method: 'POST',
+    headers: {
+      apikey: KEY,
+      Authorization: `Bearer ${KEY}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify([patch]),
+  })
+  if (!res.ok) throw new Error(`Supabase upsert ${res.status}: ${(await res.text()).slice(0, 200)}`)
+}
+
 /** 오늘(또는 지정 날짜) 이미 판정(g0 !== null)이 완료된 티커 Set을 반환 */
 export async function fetchCompletedTickers(date = getTodayString()): Promise<Set<string>> {
   try {
