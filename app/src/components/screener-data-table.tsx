@@ -581,9 +581,7 @@ export function ScreenerDataTable({
   const [reloadKey, setReloadKey] = useState(0)
   const [sliderValue, setSliderValue] = useState<number>(0)
   const [completedTickers, setCompletedTickers] = useState<Set<string>>(new Set())
-  const [analysisStatus, setAnalysisStatus] = useState<
-    Record<string, 'idle' | 'collecting' | 'voting' | 'done' | 'error'>
-  >({})
+  const [analysisStatus, setAnalysisStatus] = useState<Record<string, string>>({})
   const [isBulkAnalyzing, setIsBulkAnalyzing] = useState(false)
   const bulkStopRef = useRef(false)
 
@@ -598,76 +596,81 @@ export function ScreenerDataTable({
     }
   }, [])
 
-  // 간단분석 실행 핸들러
+  // 간단분석 실행 핸들러 - 거장 1명씩 순차 호출 (타임아웃 방지)
+  const GURU_COUNT = 13
   const handleQuickAnalysis = async (ticker: string, stockName: string, stockNation: Nation) => {
     if (completedTickers.has(ticker)) return
     const current = analysisStatus[ticker]
-    if (current === 'collecting' || current === 'voting' || current === 'done') return
+    if (current === 'collecting' || current?.startsWith('voting') || current === 'done') return
 
     try {
-      // 1단계: spiner 데이터 수집중...
+      // 1단계: 데이터 수집
       setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'collecting' }))
       const collectRes = await fetch(`/api/guru/collect?ticker=${encodeURIComponent(ticker)}`)
       const collectContentType = collectRes.headers.get('content-type') || ''
       if (!collectContentType.includes('application/json')) {
         const rawText = await collectRes.text().catch(() => '')
         throw new Error(
-          `API 응답 오류 (HTML 수신됨): Vite 개발 서버가 재시작되지 않았거나 /api/guru/collect 엔드포인트를 찾을 수 없습니다. (응답: ${rawText.slice(0, 80)})`
+          `API 응답 오류 (HTML 수신됨): /api/guru/collect 엔드포인트를 찾을 수 없습니다. (응답: ${rawText.slice(0, 80)})`
         )
       }
-      if (!collectRes.ok) {
-        throw new Error(`데이터 수집 실패 (${collectRes.status})`)
-      }
+      if (!collectRes.ok) throw new Error(`데이터 수집 실패 (${collectRes.status})`)
       const collectData = await collectRes.json()
       if (!collectData.success || !collectData.coreData) {
         throw new Error(collectData.error || '데이터 수집 내용이 없습니다.')
       }
 
-      // 2단계: spiner 13인 판정중...
-      setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'voting' }))
-      const voteRes = await fetch('/api/guru/vote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ticker,
-          date: getTodayString(),
-          coreData: collectData.coreData,
-          nation: stockNation,
-          name: stockName,
-        }),
-      })
+      // 2단계: 13인 판정 - 1명씩 순차 호출 (각 ~2-3초, 타임아웃 없음)
+      const accScores: Record<string, number> = {}
+      const today = getTodayString()
 
-      const voteContentType = voteRes.headers.get('content-type') || ''
-      if (!voteContentType.includes('application/json')) {
-        const rawText = await voteRes.text().catch(() => '')
-        throw new Error(
-          `API 응답 오류 (HTML 수신됨): /api/guru/vote 엔드포인트 응답이 올바르지 않습니다. (응답: ${rawText.slice(0, 80)})`
-        )
-      }
-      if (!voteRes.ok) {
-        const voteErr = await voteRes.json().catch(() => null)
-        throw new Error(voteErr?.error || `13인 판정 실패 (${voteRes.status})`)
-      }
-      const voteData = await voteRes.json()
-      if (!voteData.success) {
-        throw new Error(voteData.error || '13인 판정 처리에 실패했습니다.')
+      for (let i = 0; i < GURU_COUNT; i++) {
+        setAnalysisStatus((prev) => ({ ...prev, [ticker]: `voting_${i + 1}_${GURU_COUNT}` as any }))
+
+        const voteRes = await fetch('/api/guru/vote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticker,
+            date: today,
+            coreData: collectData.coreData,
+            nation: stockNation,
+            name: stockName,
+            guruIndex: i,
+          }),
+        })
+
+        const ct = voteRes.headers.get('content-type') || ''
+        if (!ct.includes('application/json')) {
+          const rawText = await voteRes.text().catch(() => '')
+          throw new Error(`/api/guru/vote 응답 오류: ${rawText.slice(0, 80)}`)
+        }
+        if (!voteRes.ok) {
+          const voteErr = await voteRes.json().catch(() => null)
+          throw new Error(voteErr?.error || `거장 ${i + 1} 판정 실패 (${voteRes.status})`)
+        }
+        const voteData = await voteRes.json()
+        if (!voteData.success) throw new Error(voteData.error || `거장 ${i + 1} 판정 처리 실패`)
+        if (voteData.col && typeof voteData.score === 'number') {
+          accScores[voteData.col] = voteData.score
+        }
       }
 
-      // 3단계: 클라이언트에서 직접 Supabase 저장 (API 서버 저장 실패 보완)
+      // 3단계: 모든 판정 완료 후 Supabase 저장
       try {
         await upsertVoteResult({
-          d: getTodayString(),
+          d: today,
           ticker,
           name: stockName,
           nation: stockNation,
-          scores: voteData.scores ?? {},
-          g0: voteData.g0 ?? null,
+          scores: accScores,
+          g0: null,
         })
       } catch (dbErr: any) {
         console.warn(`[QuickAnalysis] ${ticker} DB 저장 실패:`, dbErr.message)
       }
 
-      // 4단계: 완료 및 비활성화 (실수로라도 재분석 불가)
+      // 4단계: 완료
       setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'done' }))
       setCompletedTickers((prev) => new Set(prev).add(ticker))
     } catch (e: any) {
@@ -876,7 +879,7 @@ function ResultTable({
   picks: GuruPicks
   onSelectTicker?: (ticker: string) => void
   completedTickers: Set<string>
-  analysisStatus: Record<string, 'idle' | 'collecting' | 'voting' | 'done' | 'error'>
+  analysisStatus: Record<string, string>
   onQuickAnalysis: (ticker: string, stockName: string, nation: Nation) => void
   nation: Nation
 }) {
@@ -961,7 +964,7 @@ function ResultTable({
                 <HugeiconsIcon icon={RefreshFreeIcons} className="size-3 animate-spin text-primary" />
                 데이터 수집중...
               </Button>
-            ) : status === 'voting' ? (
+            ) : status?.startsWith('voting') ? (
               <Button
                 variant="secondary"
                 size="xs"
@@ -969,7 +972,10 @@ function ResultTable({
                 className="h-6 gap-1 px-2 text-[0.6875rem] font-medium animate-pulse"
               >
                 <HugeiconsIcon icon={RefreshFreeIcons} className="size-3 animate-spin text-primary" />
-                13인 판정중...
+                {(() => {
+                  const m = status.match(/voting_(\d+)_(\d+)/)
+                  return m ? `판정중 (${m[1]}/${m[2]})` : '13인 판정중...'
+                })()}
               </Button>
             ) : status === 'error' ? (
               <Button
