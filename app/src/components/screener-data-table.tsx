@@ -606,6 +606,13 @@ export function ScreenerDataTable({
       // 1단계: spiner 데이터 수집중...
       setAnalysisStatus((prev) => ({ ...prev, [ticker]: 'collecting' }))
       const collectRes = await fetch(`/api/guru/collect?ticker=${encodeURIComponent(ticker)}`)
+      const collectContentType = collectRes.headers.get('content-type') || ''
+      if (!collectContentType.includes('application/json')) {
+        const rawText = await collectRes.text().catch(() => '')
+        throw new Error(
+          `API 응답 오류 (HTML 수신됨): Vite 개발 서버가 재시작되지 않았거나 /api/guru/collect 엔드포인트를 찾을 수 없습니다. (응답: ${rawText.slice(0, 80)})`
+        )
+      }
       if (!collectRes.ok) {
         throw new Error(`데이터 수집 실패 (${collectRes.status})`)
       }
@@ -628,8 +635,16 @@ export function ScreenerDataTable({
         }),
       })
 
+      const voteContentType = voteRes.headers.get('content-type') || ''
+      if (!voteContentType.includes('application/json')) {
+        const rawText = await voteRes.text().catch(() => '')
+        throw new Error(
+          `API 응답 오류 (HTML 수신됨): /api/guru/vote 엔드포인트 응답이 올바르지 않습니다. (응답: ${rawText.slice(0, 80)})`
+        )
+      }
       if (!voteRes.ok) {
-        throw new Error(`13인 판정 실패 (${voteRes.status})`)
+        const voteErr = await voteRes.json().catch(() => null)
+        throw new Error(voteErr?.error || `13인 판정 실패 (${voteRes.status})`)
       }
       const voteData = await voteRes.json()
       if (!voteData.success) {
