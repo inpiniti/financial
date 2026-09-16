@@ -677,28 +677,6 @@ export function ScreenerDataTable({
     }
   }
 
-  // 전체 간단분석: 미완료 종목을 순차적으로 분석
-  const handleBulkAnalysis = useCallback(async () => {
-    if (isBulkAnalyzing) {
-      bulkStopRef.current = true
-      setIsBulkAnalyzing(false)
-      return
-    }
-    if (!filteredPicks) return
-    const pending = filteredPicks.stocks.filter(
-      (s) => !completedTickers.has(s.ticker) && analysisStatus[s.ticker] !== 'done',
-    )
-    if (pending.length === 0) return
-
-    bulkStopRef.current = false
-    setIsBulkAnalyzing(true)
-    for (const stock of pending) {
-      if (bulkStopRef.current) break
-      await handleQuickAnalysis(stock.ticker, stock.name ?? stock.ticker, nation)
-    }
-    setIsBulkAnalyzing(false)
-  }, [isBulkAnalyzing, filteredPicks, completedTickers, analysisStatus, handleQuickAnalysis, nation])
-
   // 거장이 바뀌면 슬라이더를 0단계로 초기화
   useEffect(() => {
     setSliderValue(0)
@@ -736,6 +714,28 @@ export function ScreenerDataTable({
       stocks: filteredStocks as Stock[],
     }
   }, [picks, filteredStocks])
+
+  // 전체 간단분석: 미완료 종목을 순차적으로 분석 (filteredPicks 선언 이후에 위치해야 함)
+  const handleBulkAnalysis = useCallback(async () => {
+    if (isBulkAnalyzing) {
+      bulkStopRef.current = true
+      setIsBulkAnalyzing(false)
+      return
+    }
+    if (!filteredPicks) return
+    const pending = filteredPicks.stocks.filter(
+      (s) => !completedTickers.has(s.ticker) && analysisStatus[s.ticker] !== 'done',
+    )
+    if (pending.length === 0) return
+
+    bulkStopRef.current = false
+    setIsBulkAnalyzing(true)
+    for (const stock of pending) {
+      if (bulkStopRef.current) break
+      await handleQuickAnalysis(stock.ticker, stock.name ?? stock.ticker, nation)
+    }
+    setIsBulkAnalyzing(false)
+  }, [isBulkAnalyzing, filteredPicks, completedTickers, analysisStatus, handleQuickAnalysis, nation])
 
   return (
     <div className="flex flex-col gap-4">
