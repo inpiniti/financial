@@ -1,0 +1,859 @@
+﻿{
+    "timeseries":  {
+                       "result":  [
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualFreeCashFlow"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualFreeCashFlow":  [
+                                                                     {
+                                                                         "dataId":  26185,
+                                                                         "asOfDate":  "2022-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  16312000000,
+                                                                                               "fmt":  "16.31B"
+                                                                                           }
+                                                                     },
+                                                                     {
+                                                                         "dataId":  26185,
+                                                                         "asOfDate":  "2023-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  17633000000,
+                                                                                               "fmt":  "17.63B"
+                                                                                           }
+                                                                     },
+                                                                     {
+                                                                         "dataId":  26185,
+                                                                         "asOfDate":  "2024-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  19414000000,
+                                                                                               "fmt":  "19.41B"
+                                                                                           }
+                                                                     },
+                                                                     {
+                                                                         "dataId":  26185,
+                                                                         "asOfDate":  "2025-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  26914000000,
+                                                                                               "fmt":  "26.91B"
+                                                                                           }
+                                                                     }
+                                                                 ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualGrossProfit"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualGrossProfit":  [
+                                                                    {
+                                                                        "dataId":  20046,
+                                                                        "asOfDate":  "2022-10-31",
+                                                                        "periodType":  "12M",
+                                                                        "currencyCode":  "USD",
+                                                                        "reportedValue":  {
+                                                                                              "raw":  22095000000,
+                                                                                              "fmt":  "22.09B"
+                                                                                          }
+                                                                    },
+                                                                    {
+                                                                        "dataId":  20046,
+                                                                        "asOfDate":  "2023-10-31",
+                                                                        "periodType":  "12M",
+                                                                        "currencyCode":  "USD",
+                                                                        "reportedValue":  {
+                                                                                              "raw":  24690000000,
+                                                                                              "fmt":  "24.69B"
+                                                                                          }
+                                                                    },
+                                                                    {
+                                                                        "dataId":  20046,
+                                                                        "asOfDate":  "2024-10-31",
+                                                                        "periodType":  "12M",
+                                                                        "currencyCode":  "USD",
+                                                                        "reportedValue":  {
+                                                                                              "raw":  32509000000,
+                                                                                              "fmt":  "32.51B"
+                                                                                          }
+                                                                    },
+                                                                    {
+                                                                        "dataId":  20046,
+                                                                        "asOfDate":  "2025-10-31",
+                                                                        "periodType":  "12M",
+                                                                        "currencyCode":  "USD",
+                                                                        "reportedValue":  {
+                                                                                              "raw":  43294000000,
+                                                                                              "fmt":  "43.29B"
+                                                                                          }
+                                                                    }
+                                                                ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualCurrentAssets"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualCurrentAssets":  [
+                                                                      {
+                                                                          "dataId":  23044,
+                                                                          "asOfDate":  "2022-10-31",
+                                                                          "periodType":  "12M",
+                                                                          "currencyCode":  "USD",
+                                                                          "reportedValue":  {
+                                                                                                "raw":  18504000000,
+                                                                                                "fmt":  "18.50B"
+                                                                                            }
+                                                                      },
+                                                                      {
+                                                                          "dataId":  23044,
+                                                                          "asOfDate":  "2023-10-31",
+                                                                          "periodType":  "12M",
+                                                                          "currencyCode":  "USD",
+                                                                          "reportedValue":  {
+                                                                                                "raw":  20847000000,
+                                                                                                "fmt":  "20.85B"
+                                                                                            }
+                                                                      },
+                                                                      {
+                                                                          "dataId":  23044,
+                                                                          "asOfDate":  "2024-10-31",
+                                                                          "periodType":  "12M",
+                                                                          "currencyCode":  "USD",
+                                                                          "reportedValue":  {
+                                                                                                "raw":  19595000000,
+                                                                                                "fmt":  "19.59B"
+                                                                                            }
+                                                                      },
+                                                                      {
+                                                                          "dataId":  23044,
+                                                                          "asOfDate":  "2025-10-31",
+                                                                          "periodType":  "12M",
+                                                                          "currencyCode":  "USD",
+                                                                          "reportedValue":  {
+                                                                                                "raw":  31573000000,
+                                                                                                "fmt":  "31.57B"
+                                                                                            }
+                                                                      }
+                                                                  ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualStockholdersEquity"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualStockholdersEquity":  [
+                                                                           {
+                                                                               "dataId":  23215,
+                                                                               "asOfDate":  "2022-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  22709000000,
+                                                                                                     "fmt":  "22.71B"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  23215,
+                                                                               "asOfDate":  "2023-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  23988000000,
+                                                                                                     "fmt":  "23.99B"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  23215,
+                                                                               "asOfDate":  "2024-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  67678000000,
+                                                                                                     "fmt":  "67.68B"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  23215,
+                                                                               "asOfDate":  "2025-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  81292000000,
+                                                                                                     "fmt":  "81.29B"
+                                                                                                 }
+                                                                           }
+                                                                       ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualTotalRevenue"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualTotalRevenue":  [
+                                                                     {
+                                                                         "dataId":  20100,
+                                                                         "asOfDate":  "2022-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  33203000000,
+                                                                                               "fmt":  "33.20B"
+                                                                                           }
+                                                                     },
+                                                                     {
+                                                                         "dataId":  20100,
+                                                                         "asOfDate":  "2023-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  35819000000,
+                                                                                               "fmt":  "35.82B"
+                                                                                           }
+                                                                     },
+                                                                     {
+                                                                         "dataId":  20100,
+                                                                         "asOfDate":  "2024-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  51574000000,
+                                                                                               "fmt":  "51.57B"
+                                                                                           }
+                                                                     },
+                                                                     {
+                                                                         "dataId":  20100,
+                                                                         "asOfDate":  "2025-10-31",
+                                                                         "periodType":  "12M",
+                                                                         "currencyCode":  "USD",
+                                                                         "reportedValue":  {
+                                                                                               "raw":  63887000000,
+                                                                                               "fmt":  "63.89B"
+                                                                                           }
+                                                                     }
+                                                                 ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualOperatingCashFlow"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualOperatingCashFlow":  [
+                                                                          {
+                                                                              "dataId":  26014,
+                                                                              "asOfDate":  "2022-10-31",
+                                                                              "periodType":  "12M",
+                                                                              "currencyCode":  "USD",
+                                                                              "reportedValue":  {
+                                                                                                    "raw":  16736000000,
+                                                                                                    "fmt":  "16.74B"
+                                                                                                }
+                                                                          },
+                                                                          {
+                                                                              "dataId":  26014,
+                                                                              "asOfDate":  "2023-10-31",
+                                                                              "periodType":  "12M",
+                                                                              "currencyCode":  "USD",
+                                                                              "reportedValue":  {
+                                                                                                    "raw":  18085000000,
+                                                                                                    "fmt":  "18.09B"
+                                                                                                }
+                                                                          },
+                                                                          {
+                                                                              "dataId":  26014,
+                                                                              "asOfDate":  "2024-10-31",
+                                                                              "periodType":  "12M",
+                                                                              "currencyCode":  "USD",
+                                                                              "reportedValue":  {
+                                                                                                    "raw":  19962000000,
+                                                                                                    "fmt":  "19.96B"
+                                                                                                }
+                                                                          },
+                                                                          {
+                                                                              "dataId":  26014,
+                                                                              "asOfDate":  "2025-10-31",
+                                                                              "periodType":  "12M",
+                                                                              "currencyCode":  "USD",
+                                                                              "reportedValue":  {
+                                                                                                    "raw":  27537000000,
+                                                                                                    "fmt":  "27.54B"
+                                                                                                }
+                                                                          }
+                                                                      ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualDilutedEPS"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualDilutedEPS":  [
+                                                                   {
+                                                                       "dataId":  29009,
+                                                                       "asOfDate":  "2022-10-31",
+                                                                       "periodType":  "12M",
+                                                                       "currencyCode":  "USD",
+                                                                       "reportedValue":  {
+                                                                                             "raw":  2.653,
+                                                                                             "fmt":  "2.65"
+                                                                                         }
+                                                                   },
+                                                                   {
+                                                                       "dataId":  29009,
+                                                                       "asOfDate":  "2023-10-31",
+                                                                       "periodType":  "12M",
+                                                                       "currencyCode":  "USD",
+                                                                       "reportedValue":  {
+                                                                                             "raw":  3.298,
+                                                                                             "fmt":  "3.30"
+                                                                                         }
+                                                                   },
+                                                                   {
+                                                                       "dataId":  29009,
+                                                                       "asOfDate":  "2024-10-31",
+                                                                       "periodType":  "12M",
+                                                                       "currencyCode":  "USD",
+                                                                       "reportedValue":  {
+                                                                                             "raw":  1.23,
+                                                                                             "fmt":  "1.23"
+                                                                                         }
+                                                                   },
+                                                                   {
+                                                                       "dataId":  29009,
+                                                                       "asOfDate":  "2025-10-31",
+                                                                       "periodType":  "12M",
+                                                                       "currencyCode":  "USD",
+                                                                       "reportedValue":  {
+                                                                                             "raw":  4.77,
+                                                                                             "fmt":  "4.77"
+                                                                                         }
+                                                                   }
+                                                               ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualCapitalExpenditure"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualCapitalExpenditure":  [
+                                                                           {
+                                                                               "dataId":  26005,
+                                                                               "asOfDate":  "2022-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  -424000000,
+                                                                                                     "fmt":  "-424.00M"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  26005,
+                                                                               "asOfDate":  "2023-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  -452000000,
+                                                                                                     "fmt":  "-452.00M"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  26005,
+                                                                               "asOfDate":  "2024-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  -548000000,
+                                                                                                     "fmt":  "-548.00M"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  26005,
+                                                                               "asOfDate":  "2025-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  -623000000,
+                                                                                                     "fmt":  "-623.00M"
+                                                                                                 }
+                                                                           }
+                                                                       ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualTotalDebt"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualTotalDebt":  [
+                                                                  {
+                                                                      "dataId":  23386,
+                                                                      "asOfDate":  "2022-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  39515000000,
+                                                                                            "fmt":  "39.52B"
+                                                                                        }
+                                                                  },
+                                                                  {
+                                                                      "dataId":  23386,
+                                                                      "asOfDate":  "2023-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  39229000000,
+                                                                                            "fmt":  "39.23B"
+                                                                                        }
+                                                                  },
+                                                                  {
+                                                                      "dataId":  23386,
+                                                                      "asOfDate":  "2024-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  67566000000,
+                                                                                            "fmt":  "67.57B"
+                                                                                        }
+                                                                  },
+                                                                  {
+                                                                      "dataId":  23386,
+                                                                      "asOfDate":  "2025-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  65136000000,
+                                                                                            "fmt":  "65.14B"
+                                                                                        }
+                                                                  }
+                                                              ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualCashAndCashEquivalents"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualCashAndCashEquivalents":  [
+                                                                               {
+                                                                                   "dataId":  23030,
+                                                                                   "asOfDate":  "2022-10-31",
+                                                                                   "periodType":  "12M",
+                                                                                   "currencyCode":  "USD",
+                                                                                   "reportedValue":  {
+                                                                                                         "raw":  12416000000,
+                                                                                                         "fmt":  "12.42B"
+                                                                                                     }
+                                                                               },
+                                                                               {
+                                                                                   "dataId":  23030,
+                                                                                   "asOfDate":  "2023-10-31",
+                                                                                   "periodType":  "12M",
+                                                                                   "currencyCode":  "USD",
+                                                                                   "reportedValue":  {
+                                                                                                         "raw":  14189000000,
+                                                                                                         "fmt":  "14.19B"
+                                                                                                     }
+                                                                               },
+                                                                               {
+                                                                                   "dataId":  23030,
+                                                                                   "asOfDate":  "2024-10-31",
+                                                                                   "periodType":  "12M",
+                                                                                   "currencyCode":  "USD",
+                                                                                   "reportedValue":  {
+                                                                                                         "raw":  9348000000,
+                                                                                                         "fmt":  "9.35B"
+                                                                                                     }
+                                                                               },
+                                                                               {
+                                                                                   "dataId":  23030,
+                                                                                   "asOfDate":  "2025-10-31",
+                                                                                   "periodType":  "12M",
+                                                                                   "currencyCode":  "USD",
+                                                                                   "reportedValue":  {
+                                                                                                         "raw":  16178000000,
+                                                                                                         "fmt":  "16.18B"
+                                                                                                     }
+                                                                               }
+                                                                           ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualCurrentLiabilities"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualCurrentLiabilities":  [
+                                                                           {
+                                                                               "dataId":  23047,
+                                                                               "asOfDate":  "2022-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  7052000000,
+                                                                                                     "fmt":  "7.05B"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  23047,
+                                                                               "asOfDate":  "2023-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  7405000000,
+                                                                                                     "fmt":  "7.41B"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  23047,
+                                                                               "asOfDate":  "2024-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  16697000000,
+                                                                                                     "fmt":  "16.70B"
+                                                                                                 }
+                                                                           },
+                                                                           {
+                                                                               "dataId":  23047,
+                                                                               "asOfDate":  "2025-10-31",
+                                                                               "periodType":  "12M",
+                                                                               "currencyCode":  "USD",
+                                                                               "reportedValue":  {
+                                                                                                     "raw":  18514000000,
+                                                                                                     "fmt":  "18.51B"
+                                                                                                 }
+                                                                           }
+                                                                       ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualOperatingIncome"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualOperatingIncome":  [
+                                                                        {
+                                                                            "dataId":  20109,
+                                                                            "asOfDate":  "2022-10-31",
+                                                                            "periodType":  "12M",
+                                                                            "currencyCode":  "USD",
+                                                                            "reportedValue":  {
+                                                                                                  "raw":  14282000000,
+                                                                                                  "fmt":  "14.28B"
+                                                                                              },
+                                                                            "businessSegmentData":  [
+                                                                                                        {
+                                                                                                            "dataValue":  5219000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Infrastructure software",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  15075000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Semiconductor solutions",
+                                                                                                            "isPrimarySegment":  1
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  -6069000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Unallocated expenses",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        }
+                                                                                                    ]
+                                                                        },
+                                                                        {
+                                                                            "dataId":  20109,
+                                                                            "asOfDate":  "2023-10-31",
+                                                                            "periodType":  "12M",
+                                                                            "currencyCode":  "USD",
+                                                                            "reportedValue":  {
+                                                                                                  "raw":  16451000000,
+                                                                                                  "fmt":  "16.45B"
+                                                                                              },
+                                                                            "businessSegmentData":  [
+                                                                                                        {
+                                                                                                            "dataValue":  5639000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Infrastructure software",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  16486000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Semiconductor solutions",
+                                                                                                            "isPrimarySegment":  1
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  -5918000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Unallocated expenses",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        }
+                                                                                                    ]
+                                                                        },
+                                                                        {
+                                                                            "dataId":  20109,
+                                                                            "asOfDate":  "2024-10-31",
+                                                                            "periodType":  "12M",
+                                                                            "currencyCode":  "USD",
+                                                                            "reportedValue":  {
+                                                                                                  "raw":  14996000000,
+                                                                                                  "fmt":  "15.00B"
+                                                                                              },
+                                                                            "businessSegmentData":  [
+                                                                                                        {
+                                                                                                            "dataValue":  13977000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Infrastructure software",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  16759000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Semiconductor solutions",
+                                                                                                            "isPrimarySegment":  1
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  -17273000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Unallocated expenses",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        }
+                                                                                                    ]
+                                                                        },
+                                                                        {
+                                                                            "dataId":  20109,
+                                                                            "asOfDate":  "2025-10-31",
+                                                                            "periodType":  "12M",
+                                                                            "currencyCode":  "USD",
+                                                                            "reportedValue":  {
+                                                                                                  "raw":  26075000000,
+                                                                                                  "fmt":  "26.07B"
+                                                                                              },
+                                                                            "businessSegmentData":  [
+                                                                                                        {
+                                                                                                            "dataValue":  -216000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Acquisition-related costs",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  -8062000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Amortization of acquisition-related intangible assets",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  20765000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Infrastructure software",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  -667000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Restructuring and other charges",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  21232000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Semiconductor solutions",
+                                                                                                            "isPrimarySegment":  1
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "dataValue":  -7568000000,
+                                                                                                            "segmentType":  "Business",
+                                                                                                            "segmentName":  "Stock-based compensation",
+                                                                                                            "isPrimarySegment":  0
+                                                                                                        }
+                                                                                                    ]
+                                                                        }
+                                                                    ]
+                                      },
+                                      {
+                                          "meta":  {
+                                                       "symbol":  [
+                                                                      "AVGO"
+                                                                  ],
+                                                       "type":  [
+                                                                    "annualNetIncome"
+                                                                ]
+                                                   },
+                                          "timestamp":  [
+                                                            1667174400,
+                                                            1698710400,
+                                                            1730332800,
+                                                            1761868800
+                                                        ],
+                                          "annualNetIncome":  [
+                                                                  {
+                                                                      "dataId":  20091,
+                                                                      "asOfDate":  "2022-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  11495000000,
+                                                                                            "fmt":  "11.49B"
+                                                                                        }
+                                                                  },
+                                                                  {
+                                                                      "dataId":  20091,
+                                                                      "asOfDate":  "2023-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  14082000000,
+                                                                                            "fmt":  "14.08B"
+                                                                                        }
+                                                                  },
+                                                                  {
+                                                                      "dataId":  20091,
+                                                                      "asOfDate":  "2024-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  5895000000,
+                                                                                            "fmt":  "5.89B"
+                                                                                        }
+                                                                  },
+                                                                  {
+                                                                      "dataId":  20091,
+                                                                      "asOfDate":  "2025-10-31",
+                                                                      "periodType":  "12M",
+                                                                      "currencyCode":  "USD",
+                                                                      "reportedValue":  {
+                                                                                            "raw":  23126000000,
+                                                                                            "fmt":  "23.13B"
+                                                                                        }
+                                                                  }
+                                                              ]
+                                      }
+                                  ],
+                       "error":  null
+                   }
+}
